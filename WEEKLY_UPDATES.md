@@ -21,7 +21,8 @@ Langage : RUST (formation en cours) plus compliqué à prendre en main que Java/
 * Data : 56 bits, soit la vitesse, soit le numéro de vol, soit les coordonnées 
 * Traduit les données 
 * Crée une carte toutes les X secondes  
-  
+   
+---
   
 ### Réunion du 10/02/22
 
