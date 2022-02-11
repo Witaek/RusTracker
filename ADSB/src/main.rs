@@ -33,7 +33,6 @@ fn get_flight_number(arr: [&str;10]) -> String {
     let mut flight_number: String = String::from("");
     for elem in &arr[2..] {
         let index: usize = usize::from_str_radix(elem, 2).expect("Not binary");
-        //let letter: u8 = bytes_alphabet[index];
         let letter = &ALPHABET[index..index+1];
         flight_number.push_str(letter)
     };
