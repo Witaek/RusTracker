@@ -11,25 +11,25 @@ fn main() {
 
 }
 
-fn callsign(&bin: &u64) -> String {
+fn decoupage(&bin: &u64) -> [String;10] {
     let bin_str: String = format!("{bin:056b}");
 
-    let mut arr: [&str;10] = ["";10];
-    arr[0] = &bin_str[..5];
-    arr[1] = &bin_str[5..8];
+    let mut arr: [String;10] = Default::default();
+    arr[0] = bin_str[..5].to_owned();
+    arr[1] = bin_str[5..8].to_owned();
 
     let mut index = 2;
     for i in [8, 14, 20, 26, 32, 38, 44, 50] {
-        arr[index] = &bin_str[i..i+6];
+        arr[index] = bin_str[i..i+6].to_owned();
         
         index += 1;
     }
 
-    get_flight_number(arr)
+    arr
 }
 
-fn get_flight_number(arr: [&str;10]) -> String {
-
+fn callsign(&bin: &u64) -> String {
+    let arr = decoupage(&bin);
     let mut flight_number: String = String::from("");
     for elem in &arr[2..] {
         let index: usize = usize::from_str_radix(elem, 2).expect("Not binary");
