@@ -39,4 +39,19 @@ Début du code de fonctions simples pour prendre en main RUST :
 * Continuer à se former sur RUST (suivit du book rust + mooc )
 * Prise en main de l'outil git pour ceux qui n'y sont pas encore familiers  
 
+---
+
+### Réunion du 17/02/2022
+
+Discussion pour faire le livrable 1. 
+Écriture de la présentation du projet avec les objectifs (livrable minimal et idéal), diagramme de séquence et rétroplanning.  
+La fonction callsign() qui découpe et traduit le message de 56 bits 
+Avancement dans l'apprentissage du RUST
+
+#### Objectifs pour la semaine prochaine : 
+* Terminer le livrable 1 (pour le 18/02)
+* Avancer dans l'apprentissage du RUST
+* Se répartir des fonctions simple à coder afin d'avancer dans le projet et de s'habituer à coder en RUST
+* Réfléchir à des solutions pour l'interface graphique
+
 *Dans ce document, nous décrirons le travail effectué chaque semaine ainsi que les objectifs pour la semaine d'après.*
