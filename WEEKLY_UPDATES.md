@@ -41,7 +41,7 @@ Début du code de fonctions simples pour prendre en main RUST :
 
 ---
 
-### Réunion du 17/02/2022
+### Réunion du 17/02/22
 
 Discussion pour faire le livrable 1. 
 Écriture de la présentation du projet avec les objectifs (livrable minimal et idéal), diagramme de séquence et rétroplanning.  
@@ -52,6 +52,22 @@ Avancement dans l'apprentissage du RUST
 * Terminer le livrable 1 (pour le 18/02)
 * Avancer dans l'apprentissage du RUST
 * Se répartir des fonctions simple à coder afin d'avancer dans le projet et de s'habituer à coder en RUST
-* Réfléchir à des solutions pour l'interface graphique
+* Réfléchir à des solutions pour l'interface graphique  
+
+---
+
+### Réunion du 24/02/22  
+
+* Le premier livrable a été téléversé (18/02) sur moodle
+* Code des fonctions permettant d'extraire la position (latitude, longitude) du message
+* Discussion pour l'interface graphique : nous allons commencer à regarder imgui
+  
+#### Objectifs pour la semaine prochaine :  
+* Coder la fonction vitesse
+* Découverte du framework imgui pour l'interface graphique
+* S'intéresser à la réception des signaux avec rust ( recherche d'un framework adapté ? )
+* (Continuer à apprendre le RUST)
+
+--- 
 
 *Dans ce document, nous décrirons le travail effectué chaque semaine ainsi que les objectifs pour la semaine d'après.*
