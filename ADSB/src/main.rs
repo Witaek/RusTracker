@@ -2,6 +2,7 @@ mod data_treatment;
 
 fn main() {
     test_position();
+    test_identification();
 }
 
 fn test_position() {
@@ -12,4 +13,11 @@ fn test_position() {
     println!( "longitude : {}", b);
     let c = data_treatment::position::altitude_barometric(&even_data);
     println!( "altitude : {}", c);
+}
+
+fn test_identification() {
+    let bin: u64 = 0b00100000001011001100001101110001110000110010110011100000;   // binaire exemple
+
+    let number = data_treatment::identification::callsign(&bin);
+    println!("{}",number);
 }
