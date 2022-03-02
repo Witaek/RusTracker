@@ -1,5 +1,4 @@
-# ADS-B  
-(nom temporaire)
+# RusTracker
 
 #### **Livrable minimal :**   
 --> Récupérer et traiter un signal ADS-B envoyé par plusieurs avions  
