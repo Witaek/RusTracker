@@ -1,17 +1,16 @@
 use std::str;
 
-const ALPHABET: &str= "#ABCDEFGHIJKLMNOPQRSTUVWXYZ#####_###############0123456789######";
+const ALPHABET: &str= "#ABCDEFGHIJKLMNOPQRSTUVWXYZ##### ###############0123456789######";
 
-//Découpe le message de 56 bits en sections
-fn decoupage(&bin: &u64) -> [String;10] {               // Entrée : référence à un nombre, Sortie : Array de 10 String
-    let bin_str: String = format!("{bin:056b}");        // Convertion du binaire en entrée vers un String
+//Cuts down the 56 bits message into sections 
+fn decoupage(&bin: &u64) -> [String;10] {               // In : reference to a u64 number, Out : array containing 10 strings
+    let bin_str: String = format!("{bin:056b}");        // Converts binary number to string
 
-    let mut arr: [String;10] = Default::default();      // Définition de l'array que l'on va retourner
-    arr[0] = bin_str[..5].to_owned();                   // 5 premiers bits c'est le CA
-    arr[1] = bin_str[5..8].to_owned();                  // 3 prochains c'est le 
-
+    let mut arr: [String;10] = Default::default();      
+    arr[0] = bin_str[..5].to_owned();                   // first 5 bits are TC
+    arr[1] = bin_str[5..8].to_owned();                  // 3 next bits are CA
     let mut index = 2;
-    for i in [8, 14, 20, 26, 32, 38, 44, 50] {          // découpe les sections de 6 bits restants
+    for i in [8, 14, 20, 26, 32, 38, 44, 50] {          // cuts the remaining bits into sections of 6
         arr[index] = bin_str[i..i+6].to_owned();
         
         index += 1;
@@ -20,14 +19,14 @@ fn decoupage(&bin: &u64) -> [String;10] {               // Entrée : référence
     arr
 }
 
-//Traduit les sections de message binaire à l'aide de l'alphabet
+//Translates the 6bits sections with the alphabet
 pub fn callsign(&bin: &u64) -> String {
-    let arr = decoupage(&bin);                                                          // découpage du message binaire
-    let mut flight_number: String = String::from("");                                   // création string mutable vide
-    for elem in &arr[2..] {                                                             // On parcours les éléments de arr à partir du 2 ème (on ne se sert pas des deux premiers)
-        let index: usize = usize::from_str_radix(elem, 2).expect("Not binary");         // convertit les sections de 6 bits binaire en décimal
-        let letter = &ALPHABET[index..index+1];                                         // cherche la lettre correspondante dans l'alphabet
-        flight_number.push_str(letter)                                                  // insert la lettre dans le string final
+    let arr = decoupage(&bin);                                                          
+    let mut flight_number: String = String::from("");                                   
+    for elem in &arr[2..] {                                                             // translates each section (first two aren't used)
+        let index: usize = usize::from_str_radix(elem, 2).expect("Not binary");         // convert 6 bits section into decimal
+        let letter = &ALPHABET[index..index+1];                                         // looks for corresponding letter in the alphabet
+        flight_number.push_str(letter)                                                  
     };
-    flight_number                                                                       // retourne le numéro du vol
+    flight_number                                                                       
 }
