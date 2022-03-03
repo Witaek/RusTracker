@@ -11,10 +11,10 @@ const ALPHABET : [char; 64]= ['#', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
 fn decoupage(data: &[bool; 56]) -> [&[bool];10] {               // In : reference to a u64 number, Out : array containing 10 strings
 
     let mut arr: [&[bool];10] = Default::default();      
-    arr[0] = &data[..5];                   // first 5 bits are TC
-    arr[1] = &data[5..8];                  // 3 next bits are CA
+    arr[0] = &data[..5];                                        // first 5 bits are TC
+    arr[1] = &data[5..8];                                       // 3 next bits are CA
     let mut index = 2;
-    for i in [8, 14, 20, 26, 32, 38, 44, 50] {          // cuts the remaining bits into sections of 6
+    for i in [8, 14, 20, 26, 32, 38, 44, 50] {                  // cuts the remaining bits into sections of 6
         arr[index] = &data[i..i+6];
         
         index += 1;
@@ -28,9 +28,29 @@ pub fn callsign(&data: &[bool; 56]) -> String {
     let arr = decoupage(&data);                                                          
     let mut flight_number: String = String::from("");                                   
     for elem in &arr[2..] {                                                             // translates each section (first two aren't used)
-        let index = bin2dec(elem) as usize;                                                      // convert 6 bits section into decimal
+        let index = bin2dec(elem) as usize;                                             // convert 6 bits section into decimal
         let letter = &ALPHABET[index];                                                  // looks for corresponding letter in the alphabet
         flight_number.push(*letter)                                                  
     };
     flight_number                                                                       
+}
+
+#[cfg(test)]
+
+const CALLSIGN_BIN: [bool;56] = [false, false, true, false, false, false, false,
+                                false, false, false, true, false, true, true, false, false,
+                                true, true, false, false, false, false, true, true, false,
+                                true, true, true, false, false, false, true, true, true, false,
+                                false, false, false, true, true, false, false, true, false, true,
+                                true, false, false, true, true, true, false, false, false, false, false];
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn callsign_works() {
+        println!("Identification : {}", callsign(&CALLSIGN_BIN));
+        assert_eq!(callsign(&CALLSIGN_BIN), String::from("KLM1023 "));
+    }
+
 }

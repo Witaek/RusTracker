@@ -91,7 +91,7 @@ pub fn altitude_barometric (data: &[bool]) -> u32 {           //TC between 9 and
     
     let q_bit = &alt_bin[7];
     
-    let mut alt_bin_wq: [bool;11] = [true; 11]; //altitude binary without q bit
+    let mut alt_bin_wq: [bool;11] = [true; 11];              //altitude binary without q bit
     
     for k in 0..11 {
         if k < 7 {
@@ -122,7 +122,7 @@ fn get_ss(data: &[bool]) -> &[bool]{                //get Surveillance status
     return &data[5..7]
 }
 
-fn get_saf(data: &[bool]) -> &bool{               //get Single antenna flag
+fn get_saf(data: &[bool]) -> &bool{                 //get Single antenna flag
     return &data[7]
 }
 
@@ -130,11 +130,11 @@ fn get_alt(data: &[bool]) -> &[bool]{               //get Encoded altitude
     return &data[8..20]
 }
 
-fn get_t(data: &[bool]) -> &bool{                 //get time
+fn get_t(data: &[bool]) -> &bool{                   //get time
     return &data[20]
 }
 
-fn get_f(data: &[bool]) -> &bool{                 //get cpr format
+fn get_f(data: &[bool]) -> &bool{                   //get cpr format
     return &data[21]
 }
 
@@ -142,6 +142,40 @@ fn get_cpr_lat(data: &[bool]) -> &[bool]{           //get cpr latitude
     return &data[22..39]
 }
 
-fn get_cpr_lon(data: &[bool]) -> &[bool]{            //get cpr longitude
+fn get_cpr_lon(data: &[bool]) -> &[bool]{           //get cpr longitude
     return &data[39..56]
+}
+
+#[cfg(test)]
+
+const EVEN_BIN: [bool;56] = [false, true, false, true, true, false,
+                            false, false, true, true, false, false, false, false, true, 
+                            true, true, false, false, false, false, false, true, false, 
+                            true, true, false, true, false, true, true, false, true, false, 
+                            false, true, false, false, false, false, true, true, false, false, 
+                            true, false, false, false, true, false, true, false, true, true, false, false];
+
+const ODD_BIN: [bool;56] = [false, true, false, true, true, false,
+                            false, false, true, true, false, false, false, false, true, true,
+                            true, false, false, false, false, true, true, false, false, true,
+                            false, false, false, false, true, true, false, true, false, true,
+                            true, true, false, false, true, true, false, false, false, true,
+                            false, false, false, false, false, true, false, false, true, false];
+
+
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn coor_works() {
+        println!("Longitude : {} || Latitude : {}", coor(&EVEN_BIN, &ODD_BIN).0 ,coor(&EVEN_BIN, &ODD_BIN).1 );
+        assert_eq!(coor(&EVEN_BIN, &ODD_BIN), (52.257202,3.9193726));
+    }
+
+    #[test]
+    fn altitude_barometric_works() {
+        println!("Altitude : {}", altitude_barometric(&EVEN_BIN));
+        assert_eq!(altitude_barometric(&EVEN_BIN), 38000);
+    }
 }
