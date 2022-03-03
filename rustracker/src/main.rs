@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 //declaration des modules
 mod data_treatment;
 mod object;
@@ -34,7 +36,12 @@ fn test_position() {
 }
 
 fn test_identification() {
-    let bin: u64 = 0b00100000001011001100001101110001110000110010110011100000;   // binaire exemple
+    let bin = [false, false, true, false, false, false, false,
+    false, false, false, true, false, true, true, false, false,
+    true, true, false, false, false, false, true, true, false,
+    true, true, true, false, false, false, true, true, true, false,
+    false, false, false, true, true, false, false, true, false, true,
+    true, false, false, true, true, true, false, false, false, false, false];   // binaire exemple
 
     let number = data_treatment::identification::callsign(&bin);
     println!("{}",number);
