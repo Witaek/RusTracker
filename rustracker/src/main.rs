@@ -1,14 +1,31 @@
+//declaration des modules
 mod data_treatment;
 mod object;
+mod ressources;
+use crate::object::squitter::Squitter;
 
+//main
 fn main() {
     test_position();
     test_identification();
 }
 
 fn test_position() {
-    let even_data : u64 = 0b01011000110000111000001011010110100100001100100010101100;
-    let odd_data : u64 =  0b01011000110000111000011001000011010111001100010000010010;
+
+    let even_data = [false, true, false, true, true, false,
+    false, false, true, true, false, false, false, false, true, 
+    true, true, false, false, false, false, false, true, false, 
+    true, true, false, true, false, true, true, false, true, false, 
+    false, true, false, false, false, false, true, true, false, false, 
+    true, false, false, false, true, false, true, false, true, true, false, false];
+
+    let odd_data =  [false, true, false, true, true, false,
+    false, false, true, true, false, false, false, false, true, true,
+    true, false, false, false, false, true, true, false, false, true,
+    false, false, false, false, true, true, false, true, false, true,
+    true, true, false, false, true, true, false, false, false, true,
+    false, false, false, false, false, true, false, false, true, false];
+
     let (a,b) = data_treatment::position::coor(&even_data, &odd_data);
     println!( "latitude : {}", a);
     println!( "longitude : {}", b);

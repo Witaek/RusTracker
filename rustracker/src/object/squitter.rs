@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
-use super::ressources::binary_fun::bin2dec as bin2dec;
-use super::ressources::binary_fun::bin2hex as bin2hex;
+use crate::ressources::binary_fun::bin2dec as bin2dec;
+use crate::ressources::binary_fun::bin2hex as bin2hex;
 
 pub struct Squitter {
     msg: [bool; 112],

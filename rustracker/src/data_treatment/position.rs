@@ -1,3 +1,7 @@
+#![allow(dead_code)]
+
+use crate::ressources::binary_fun::bin2dec as bin2dec;
+
 const PI: f32 = std::f32::consts::PI;
 const NZ: f32 = 15.;
 
@@ -22,39 +26,17 @@ fn j_calcul(&cpr_lat_even : &f32, &cpr_lat_odd: &f32) -> f32 {
     return (((59. * &cpr_lat_even - 60. * &cpr_lat_odd) as f32) + 0.5).floor();
 }
 
-//découpage de la data selon le format |0:TC|1:SS|2:SAF|3:ALT|4:T|5:F|6:CPR-LAT|7:CPR-LON|
-//OPTI : certaines données peuvent être inutiles (donc supprimer leurs découpages)
-//insipiré de la branche identification (A potentiellement retravailler)
-fn decoupage(&bin : &u64) -> [String; 8] {
-    let bin_str: String = format!("{bin:056b}");
-    let mut res: [String; 8] = Default::default();
-    
-    res[0]=bin_str[0..5].to_owned();
-    res[1]=bin_str[5..7].to_owned();
-    res[2]=bin_str[7..8].to_owned();
-    res[3]=bin_str[8..20].to_owned();
-    res[4]=bin_str[20..21].to_owned();
-    res[5]=bin_str[21..22].to_owned();
-    res[6]=bin_str[22..39].to_owned();
-    res[7]=bin_str[39..56].to_owned();
-    return res;
-}
-
 //calcul des coordonnées
-pub fn coor(&even_data: &u64, &odd_data: &u64) -> (f32,f32) {
+pub fn coor(even_data: &[bool; 56], odd_data: &[bool; 56]) -> (f32,f32) {
     //constant declaration
     let d_lat_even = 360. / (4. * NZ);
     let d_lat_odd = 360. / (4. * NZ - 1.);
 
-    //binary parts
-    let even_data_tab = decoupage(&even_data);
-    let odd_data_tab = decoupage(&odd_data);
-
     //cpr conversion
-    let cpr_lat_even = (u32::from_str_radix(even_data_tab[6].as_str(), 2).unwrap() as f32) / 131072.;//ma value of (2^17)
-    let cpr_lat_odd = (u32::from_str_radix(odd_data_tab[6].as_str(), 2).unwrap() as f32) / 131072.;
-    let cpr_lon_even = (u32::from_str_radix(even_data_tab[7].as_str(), 2).unwrap() as f32) / 131072.;
-    let cpr_lon_odd = (u32::from_str_radix(odd_data_tab[7].as_str(), 2).unwrap() as f32) / 131072.;
+    let cpr_lat_even = (bin2dec(get_cpr_lat(even_data)) as f32) / 131072.;  //max value of (2^17)
+    let cpr_lat_odd = (bin2dec(get_cpr_lat(odd_data)) as f32) / 131072.;
+    let cpr_lon_even = (bin2dec(get_cpr_lon(even_data)) as f32) / 131072.;
+    let cpr_lon_odd = (bin2dec(get_cpr_lon(odd_data)) as f32) / 131072.;
 
     //index j calcul
     let j = j_calcul(&cpr_lat_even, &cpr_lat_odd);
@@ -68,7 +50,7 @@ pub fn coor(&even_data: &u64, &odd_data: &u64) -> (f32,f32) {
 
     //we keep the latitude of the most recent data according the time stamp
     let lat = 
-        if u8::from_str_radix(odd_data_tab[4].as_str(), 2).unwrap() >= u8::from_str_radix(odd_data_tab[4].as_str(), 2).unwrap() {
+        if get_t(even_data) >= get_t(odd_data) {
             lat_even
         } else {
             lat_odd
@@ -92,7 +74,7 @@ pub fn coor(&even_data: &u64, &odd_data: &u64) -> (f32,f32) {
 
     //longitude calcul
     let mut lon = 
-        if u8::from_str_radix(odd_data_tab[4].as_str(), 2).unwrap() >= u8::from_str_radix(odd_data_tab[4].as_str(), 2).unwrap() {
+        if get_t(even_data) >= get_t(odd_data) {
             lon_even
         } else {
             lon_odd
@@ -104,22 +86,62 @@ pub fn coor(&even_data: &u64, &odd_data: &u64) -> (f32,f32) {
     return (lat, lon);
 }
 
-pub fn altitude_barometric (&data: &u64) -> u32 {           //TC between 9 and 18
-    let mut alt_bin = decoupage(&data)[3].to_owned();
+pub fn altitude_barometric (data: &[bool]) -> u32 {           //TC between 9 and 18
+    let alt_bin = get_alt(data);
     
-
-    let q_bit = alt_bin[7..8].to_owned();
+    let q_bit = &alt_bin[7];
     
-    alt_bin.remove(7);
-
-    let alt_dec = u32::from_str_radix(alt_bin.as_str(), 2).unwrap();
+    let mut alt_bin_wq: [bool;11] = [true; 11]; //altitude binary without q bit
+    
+    for k in 0..11 {
+        if k < 7 {
+            alt_bin_wq[k] = alt_bin[k]
+        } else if k > 7 {
+            alt_bin_wq[k] = alt_bin[k+1]
+        }
+    }
+    let alt_dec = bin2dec(&alt_bin_wq);
     let alt: u32 = 
-        if q_bit.eq("1") { alt_dec * 25 - 1000 }
+        if *q_bit { alt_dec * 25 - 1000 }
         else { alt_dec * 100 - 1000 };
     return alt;
 }
 
-pub fn altitude_gnss (&data: &u64) -> u32 {                 //TC between 20 and 22
-    let alt_bin = decoupage(&data)[3].to_owned();
-    return u32::from_str_radix(alt_bin.as_str(), 2).unwrap();
+pub fn altitude_gnss (data: &[bool]) -> u32 {                 //TC between 20 and 22
+    return bin2dec(get_cpr_lat(data));
+}
+
+
+
+//parsing function
+fn get_tc(data: &[bool]) -> &[bool]{                //get type code
+    return &data[0..5]
+}
+
+fn get_ss(data: &[bool]) -> &[bool]{                //get Surveillance status
+    return &data[5..7]
+}
+
+fn get_saf(data: &[bool]) -> &bool{               //get Single antenna flag
+    return &data[7]
+}
+
+fn get_alt(data: &[bool]) -> &[bool]{               //get Encoded altitude
+    return &data[8..20]
+}
+
+fn get_t(data: &[bool]) -> &bool{                 //get time
+    return &data[20]
+}
+
+fn get_f(data: &[bool]) -> &bool{                 //get cpr format
+    return &data[21]
+}
+
+fn get_cpr_lat(data: &[bool]) -> &[bool]{           //get cpr latitude
+    return &data[22..39]
+}
+
+fn get_cpr_lon(data: &[bool]) -> &[bool]{            //get cpr longitude
+    return &data[39..56]
 }
