@@ -70,4 +70,21 @@ Avancement dans l'apprentissage du RUST
 
 --- 
 
+### Réunion du 03/03/22 (point rencontre)  
+
+* Préférable de scinder le projet en deux sous-projets : 'backend' et 'frontend'
+* Discussion autout de l'interface graphique : on part sur imgui avec l'utilisation de ZeroMQ pour séparer le 'backend' et le 'frontend'
+* Réception des messages : voir le framword rtlsdr_mt (pas actualisé) sinon se tourner vers soapysdr
+* Choix d'utiliser des array de booléens pour représenter les messages binaires plutôt que des string pour gain de mémoire
+* Discussion autour du livrable 2
+* Prochain point rencontre le 16/03 à 16h sur le campus
+
+#### Objectifs pour la semaine prochaine (ou prochain point rencontre) :  
+
+* Adapter les fonctions avec le systèmes de tableaux de booléens
+* Intégration de tests rust pour les fonctions définies
+* Préparation du livrable 2 (premier prototype) : 
+  * Backend : test des fonctions sur plusieurs messages binaires, réception des messages, démodulation (traitement I&Qs)
+  * Frontend : Afficher une carte avec des points mouvants, possibilité d'afficher les infos sur les points (vitesse, position, etc)
+
 *Dans ce document, nous décrirons le travail effectué chaque semaine ainsi que les objectifs pour la semaine d'après.*
