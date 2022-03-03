@@ -1,4 +1,5 @@
 mod data_treatment;
+mod object;
 
 fn main() {
     test_position();
