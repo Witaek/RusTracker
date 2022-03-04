@@ -3,6 +3,7 @@
 use crate::data_treatment::position::coor;
 use crate::data_treatment::position::altitude_barometric;
 use crate::data_treatment::identification::callsign;
+use crate::data_treatment::speed::speed;
 
 #[cfg(test)]
 
@@ -60,4 +61,23 @@ mod tests_cs {
         assert_eq!(callsign(&CALLSIGN_BIN), String::from("KLM1023 "));
     }
 
+}
+
+#[cfg(test)]
+
+const TYPE_1: [bool;56] = [true, false, false, true, true, false, false, true, false, true, false, false, false, 
+                          true, false, false, false, false, false, false, true, false, false, true, true, false, 
+                          false, true, false, true, false, false, false, false, false, false, true, false, false, 
+                          false, false, false, true, true, true, false, false, false, false, false, false, true, 
+                          false, true, true, true];
+
+
+mod tests_speed {
+    use super::*;
+
+    #[test]
+    fn speed_works() {
+        println!("Speed : {} kt", speed(&TYPE_1));
+        assert_eq!(speed(&TYPE_1), 159.20113);
+    }
 }

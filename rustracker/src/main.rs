@@ -1,5 +1,7 @@
 #![allow(unused_imports)]
 
+use data_treatment::speed::speed;
+
 //declaration des modules
 mod data_treatment;
 mod object;
@@ -9,4 +11,5 @@ mod test;
 
 //main
 fn main() {
+
 }
