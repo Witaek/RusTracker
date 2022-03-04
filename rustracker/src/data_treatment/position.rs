@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::ressources::binary_fun::bin2dec as bin2dec;
+use crate::ressources::binary_fun::bin2dec;
 
 const PI: f32 = std::f32::consts::PI;
 const NZ: f32 = 15.;
@@ -144,38 +144,4 @@ fn get_cpr_lat(data: &[bool]) -> &[bool]{           //get cpr latitude
 
 fn get_cpr_lon(data: &[bool]) -> &[bool]{           //get cpr longitude
     return &data[39..56]
-}
-
-#[cfg(test)]
-
-const EVEN_BIN: [bool;56] = [false, true, false, true, true, false,
-                            false, false, true, true, false, false, false, false, true, 
-                            true, true, false, false, false, false, false, true, false, 
-                            true, true, false, true, false, true, true, false, true, false, 
-                            false, true, false, false, false, false, true, true, false, false, 
-                            true, false, false, false, true, false, true, false, true, true, false, false];
-
-const ODD_BIN: [bool;56] = [false, true, false, true, true, false,
-                            false, false, true, true, false, false, false, false, true, true,
-                            true, false, false, false, false, true, true, false, false, true,
-                            false, false, false, false, true, true, false, true, false, true,
-                            true, true, false, false, true, true, false, false, false, true,
-                            false, false, false, false, false, true, false, false, true, false];
-
-
-
-mod tests {
-    use super::*;
-
-    #[test]
-    fn coor_works() {
-        println!("Longitude : {} || Latitude : {}", coor(&EVEN_BIN, &ODD_BIN).0 ,coor(&EVEN_BIN, &ODD_BIN).1 );
-        assert_eq!(coor(&EVEN_BIN, &ODD_BIN), (52.257202,3.9193726));
-    }
-
-    #[test]
-    fn altitude_barometric_works() {
-        println!("Altitude : {}", altitude_barometric(&EVEN_BIN));
-        assert_eq!(altitude_barometric(&EVEN_BIN), 38000);
-    }
 }

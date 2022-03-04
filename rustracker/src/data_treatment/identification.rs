@@ -34,23 +34,3 @@ pub fn callsign(&data: &[bool; 56]) -> String {
     };
     flight_number                                                                       
 }
-
-#[cfg(test)]
-
-const CALLSIGN_BIN: [bool;56] = [false, false, true, false, false, false, false,
-                                false, false, false, true, false, true, true, false, false,
-                                true, true, false, false, false, false, true, true, false,
-                                true, true, true, false, false, false, true, true, true, false,
-                                false, false, false, true, true, false, false, true, false, true,
-                                true, false, false, true, true, true, false, false, false, false, false];
-mod tests {
-
-    use super::*;
-
-    #[test]
-    fn callsign_works() {
-        println!("Identification : {}", callsign(&CALLSIGN_BIN));
-        assert_eq!(callsign(&CALLSIGN_BIN), String::from("KLM1023 "));
-    }
-
-}
