@@ -28,7 +28,8 @@ pub fn speed(msg: &[bool;56]) -> f32 {
     let data = cut_in_sections(msg);
     let sub_type = bin2dec(data[1]);
 
-    if &sub_type == &1 {
+    if &sub_type == &1 || &sub_type == &2 {
+
         let dew: u32 = bin2dec(data[5][0..1].try_into().expect("slice with incorrect length"));
         let vew: i32 = bin2dec(data[5][1..11].try_into().expect("slice with incorrect length")) as i32;
         let dns: u32 = bin2dec(data[5][11..12].try_into().expect("slice with incorrect length"));
@@ -49,8 +50,18 @@ pub fn speed(msg: &[bool;56]) -> f32 {
         let v: f32 = ((vy.pow(2) + vx.pow(2)) as f32).sqrt();
 
         return v;
+    } else if &sub_type == &3 || &sub_type == &4 {
+
+        //let sh: u32 = bin2dec(data[5][0..1].try_into().expect("slice with incorrect length"));                      //Status bit for magnetic heading
+        //let hdg: i32 = bin2dec(data[5][1..11].try_into().expect("slice with incorrect length")) as i32;             //magnetic heading 
+        let as_type: u32 = bin2dec(data[5][11..12].try_into().expect("slice with incorrect length"));                 //air-speed type
+        let air_speed: i32 = bin2dec(data[5][12..].try_into().expect("slice with incorrect length")) as i32;          //air-speed
+        
+
+        let v = (air_speed - 1) as f32;
+        v
     } else {
-        return 5.
+        panic!("wrong speed sub_type")
     }
 }
 

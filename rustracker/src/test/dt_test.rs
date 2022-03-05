@@ -71,13 +71,23 @@ const TYPE_1: [bool;56] = [true, false, false, true, true, false, false, true, f
                           false, false, false, true, true, true, false, false, false, false, false, false, true, 
                           false, true, true, true];
 
+const TYPE_3: [bool;56] = [true, false, false, true, true, false, true, true, false, false, false, false, false, 
+                          true, true, false, true, false, true, true, false, true, true, false, true, false, true, 
+                          false, true, true, true, true, false, false, false, true, true, false, false, false, true,
+                           false, false, true, false, true, false, false, false, false, false, false, false, false, 
+                           false, false];
+
 
 mod tests_speed {
     use super::*;
 
     #[test]
     fn speed_works() {
-        println!("Speed : {} kt", speed(&TYPE_1));
+        println!("Speed subtype1 : {} kt", speed(&TYPE_1));
+        println!("Speed subtype3 : {} kt", speed(&TYPE_3));
+
         assert_eq!(speed(&TYPE_1), 159.20113);
+        assert_eq!(speed(&TYPE_3), 375.);
+
     }
 }
