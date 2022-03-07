@@ -3,5 +3,40 @@
 version = 3
 
 [[package]]
+name = "libc"
+version = "0.2.119"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1bf2e165bb3457c8e098ea76f3e3bc9db55f87aa90d52d0e6be741470916aaa4"
+
+[[package]]
+name = "pkg-config"
+version = "0.3.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58893f751c9b0412871a09abd62ecd2a00298c6c83befa223ef98c52aef40cbe"
+
+[[package]]
+name = "rtlsdr_mt"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62eb4b4b0366801a8d5c3ac62d8af539b8033c7dfa8d72384fe5afa9285e0034"
+dependencies = [
+ "libc",
+ "rtlsdr_sys",
+]
+
+[[package]]
+name = "rtlsdr_sys"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5b10767c93eb67d309e4e7530d5eb1e3ce2427fd48544e6488b03fb4ec255a67"
+dependencies = [
+ "libc",
+ "pkg-config",
+]
+
+[[package]]
 name = "rustracker"
 version = "0.1.0"
+dependencies = [
+ "rtlsdr_mt",
+]
