@@ -1,5 +1,5 @@
 //test of module data_treatment
-
+#![allow(dead_code)]
 use crate::data_treatment::position::coor;
 use crate::data_treatment::position::altitude_barometric;
 use crate::data_treatment::identification::callsign;

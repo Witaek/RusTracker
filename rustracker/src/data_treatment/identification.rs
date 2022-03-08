@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::ressources::binary_fun::bin2dec;
 
 const ALPHABET : [char; 64]= ['#', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
