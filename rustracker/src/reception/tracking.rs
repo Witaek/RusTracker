@@ -27,7 +27,7 @@ impl Track {
     pub fn tracking(&mut self)-> () {
         let (ctl, mut rdr) = init_device();
 
-        rdr.read_async(15, 32_000*16, |bytes| {self.add_track(amp(bytes));}).unwrap();
+        rdr.read_async(15, 32_000*2, |bytes| {self.add_track(amp(bytes));}).unwrap();
     }
 
     fn add_track(&mut self, samples: Vec<f64>) ->() {
@@ -39,7 +39,7 @@ impl Track {
 
     fn update_track(&mut self, s: Squitter) {
         //cette fonction doit mettre à jour ou ajouter un avion (Plane) de l'attribut tracklist de self
-        if s.crc_check() {
+        if s.crc_check() && s.get_df()==17 {
             println!("crc vrai");
             let plane = match self.track_list.entry(s.get_adress()) {
                 Vacant(entry) => entry.insert(Plane::new(&s)),

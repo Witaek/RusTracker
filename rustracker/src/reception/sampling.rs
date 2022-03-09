@@ -7,8 +7,8 @@ pub fn init_device()-> (rtlsdr_mt::Controller, rtlsdr_mt::Reader) {
     ctl.set_ppm(130).unwrap();
     ctl.set_sample_rate(2_000_000).unwrap();
     ctl.enable_agc().unwrap();
-    println!("{}",ctl.center_freq());
-    println!("{}",ctl.tuner_gain());
+    println!("frequence : {}",ctl.center_freq());
+    println!("gain : {}",ctl.tuner_gain());
 
 
     return (ctl,rdr)
@@ -29,6 +29,7 @@ pub fn extraction(samples: Vec<f64>)-> Vec<[f64;224]> {
     for i in 0..(n - (112*2 + 8*2) - 1){
         let av_max_value = (samples[i] + samples[i+2] + samples[i+7] + samples[i+9])/4.; //average value of the hifh amplitude in the preambule*
         // preambule logical detection
+        if av_max_value < 0.05 {continue} //seuil de détection
         if  samples[i]    >  samples [i+1] &&
             samples[i+1]  <  samples [i+2] &&
             samples[i+1]  <  av_max_value &&
@@ -57,11 +58,11 @@ pub fn extraction(samples: Vec<f64>)-> Vec<[f64;224]> {
 pub fn sample2binary(packets: Vec<[f64;224]>) -> Vec<Squitter> {
     let mut binaries: Vec<Squitter> = vec![];
     for sample in packets {
-        let mut s = Squitter::default();
+        let mut s = Squitter::default(); //initialisation d'un squitter remplie de 0
         for i in 0..112 {
             let a = sample[i*2];
             let b = sample[i*2 + 1];
-            if a>b {
+            if a>b { //front descendant = 1
                 s.msg[i] = true;
             } else if a==b {
                 continue;
@@ -71,11 +72,3 @@ pub fn sample2binary(packets: Vec<[f64;224]>) -> Vec<Squitter> {
     }
     return binaries;
 }
-
-
-
-
-
-
-
-
