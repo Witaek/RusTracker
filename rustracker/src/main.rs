@@ -8,9 +8,11 @@ mod reception;
 use crate::object::squitter::Squitter;
 use crate::reception::tracking::Track;
 mod test;
+use crate::reception::sampling::amp;
 
 //main
 fn main() {
     let mut radar1 = Track::new();
     radar1.tracking();
 }
+

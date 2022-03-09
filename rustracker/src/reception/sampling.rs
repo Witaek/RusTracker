@@ -4,8 +4,11 @@ use crate::object::squitter::Squitter;
 pub fn init_device()-> (rtlsdr_mt::Controller, rtlsdr_mt::Reader) {
     let (mut ctl, rdr) = rtlsdr_mt::open(0).unwrap();
     ctl.set_center_freq(1090_000_000).unwrap();
+    ctl.set_ppm(130).unwrap();
     ctl.set_sample_rate(2_000_000).unwrap();
     ctl.enable_agc().unwrap();
+    println!("{}",ctl.center_freq());
+    println!("{}",ctl.tuner_gain());
 
 
     return (ctl,rdr)
@@ -45,7 +48,7 @@ pub fn extraction(samples: Vec<f64>)-> Vec<[f64;224]> {
             samples[i+13] <  av_max_value &&
             samples[i+14] <  av_max_value &&
             samples[i+15] <  av_max_value  {
-                packets.push(samples[(i+8*2)..(i+8*2+112*2)].try_into().expect("slice with incorrect length for packets"))
+                packets.push(samples[(i+8*2)..(i+8*2+112*2)].try_into().expect("slice with incorrect length for packets"));
         }
     }
     return packets;
