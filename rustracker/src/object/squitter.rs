@@ -40,5 +40,24 @@ impl Squitter {
         return bin2dec(&self.msg[32..37]);
     }
 
+    pub fn crc_check(&self) -> bool {
+        let poly = [true, true, true, true, true, true, true,
+                    true, true, true, true, true, true, false, 
+                    true, false, false, false, false, false,
+                    false, true, false, false, true];
+        let mut msgc = self.msg.clone();
+        let mut i = 0;
+        while i < (112-24) {
+            let bit0 = msgc[i];
+            if bit0==false{i+=1;}
+            else {
+                for k in 0..25 {
+                    msgc[i+k] = msgc[i+k] ^ poly[k]; //operation XOR
+                }
+            }
+        }
+        return [false;112]== msgc;
+    }
+
 
 }

@@ -49,6 +49,10 @@ impl Plane {
         }
     }
 
+    pub fn update_plane(&self, msg: Squitter) -> () {
+        //use a received Squitter to call the adequate fonction according to the type code
+    }
+
     pub fn set_callsign(&mut self, msg: Squitter) -> () {
         //update the callsign (using module data_treatment::identification)
         self.callsign = callsign(msg.get_data());

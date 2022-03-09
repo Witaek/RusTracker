@@ -8,6 +8,7 @@ use super::sampling::init_device;
 use super::sampling::extraction;
 use super::sampling::amp;
 use super::sampling::sample2binary;
+use std::collections::hash_map::Entry::{Occupied, Vacant};
 
 
 const CHUNKS_NUMBER: u32 = 16;
@@ -32,8 +33,14 @@ impl Track {
         }
     }
 
-    fn update_track(&mut self, s: Squitter) {
+    fn update_track(&mut self, msg: Squitter) {
         //cette fonction doit mettre à jour ou ajouter un avion (Plane) de l'attribut tracklist de self
+        if msg.crc_check() {
+            let plane = match self.track_list.entry(msg.get_adress()) {
+                Vacant(entry) => entry.insert(Plane::new(msg.get_adress())),
+                Occupied(entry) => entry.into_mut(),
+            };
+            plane.update_plane(msg);
+        }
     }
-
 }
