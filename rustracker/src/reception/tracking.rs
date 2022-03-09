@@ -11,8 +11,8 @@ use super::sampling::sample2binary;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 
 
-const CHUNKS_NUMBER: u32 = 16;
-const BYTES_NUMBER: u32 = 32_000;
+const CHUNKS_NUMBER: u32 = 4;
+const BYTES_NUMBER: u32 = 32000;
 
 
 pub struct Track {
@@ -20,13 +20,17 @@ pub struct Track {
 }
 
 impl Track {
-    pub async fn tracking(&mut self)-> () {
-        let (ctl, mut rdr) = init_device();
-
-        rdr.read_async(CHUNKS_NUMBER, BYTES_NUMBER, |bytes| {self.add_track(amp(bytes));}).unwrap();
+    pub fn new () -> Self {
+        Self {track_list: HashMap::new()}
     }
 
-    fn add_track(&mut self, samples: Vec<f32>) ->() {
+    pub fn tracking(&mut self)-> () {
+        let (ctl, mut rdr) = init_device();
+
+        rdr.read_async(1, 32_000, |bytes| {self.add_track(amp(bytes));}).unwrap();
+    }
+
+    fn add_track(&mut self, samples: Vec<f64>) ->() {
         let binaries = sample2binary(extraction(samples));
         for s in binaries {
             self.update_track(s);
@@ -36,11 +40,13 @@ impl Track {
     fn update_track(&mut self, msg: Squitter) {
         //cette fonction doit mettre à jour ou ajouter un avion (Plane) de l'attribut tracklist de self
         if msg.crc_check() {
+            println!("msg ok");
             let plane = match self.track_list.entry(msg.get_adress()) {
-                Vacant(entry) => entry.insert(Plane::new(msg.get_adress())),
+                Vacant(entry) => entry.insert(Plane::new(&msg)),
                 Occupied(entry) => entry.into_mut(),
             };
             plane.update_plane(msg);
+            plane.display();
         }
     }
 }

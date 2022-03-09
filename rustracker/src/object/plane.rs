@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![allow(unused_variables)]
 
 //CODE IN DEVELOPPEMENT [NOT WORKING]
 
@@ -6,6 +7,7 @@ use super::squitter::Squitter;
 use crate::data_treatment::identification::callsign;
 use crate::data_treatment::position::coor;
 use crate::data_treatment::position::altitude_barometric;
+use crate::data_treatment::position::altitude_gnss;
 
 pub struct Plane {
     //definition of characteristic attributes of the plane
@@ -32,34 +34,46 @@ pub struct Plane {
 //methods implementation
 impl Plane {
 
-    pub fn new(a: String) -> Self { //constructeur à compléter [ACTUELLEMENT : POUR LES TEST]
-        Self {
-            icao: a,
+    pub fn new(msg: &Squitter) -> Self { //constructeur à compléter [ACTUELLEMENT : POUR LES TEST]
+        let mut n = Self {
+            icao: msg.get_adress(),
             complement: "".to_owned(),
             callsign: "".to_owned(),
             position: (0.,0.),
             altitude: (0),
             speed: (0,0.,0,"".to_owned()),
-            wake_vortex_cat: "Unknow".to_owned(),
+            wake_vortex_cat: "".to_owned(),
             
             position_history: vec![],
             speed_history: vec![],
             
             data_pos: (Squitter::default(),Squitter::default()),
+        };
+        n.set_wvc(msg);
+        n.get_complement(msg);
+        println!("nouvel avion");
+        return n;
+    }
+
+    pub fn update_plane(&mut self, msg: Squitter) -> () {
+        //use a received Squitter to call the adequate fonction according to the type code
+        match msg.get_tc() {
+            1..=4 => if self.callsign == String::from("") {self.set_callsign(&msg)},
+            9..=18 => {self.pairing(&msg); self.set_position(); self.set_altitude_baro(&msg); self.add_position();},
+            20..=22 => {self.pairing(&msg); self.set_position(); self.set_altitude_gnss(&msg); self.add_position();},
+            19 => {self.set_speed(&msg); self.add_speed();},
+            _=>(),
         }
     }
 
-    pub fn update_plane(&self, msg: Squitter) -> () {
-        //use a received Squitter to call the adequate fonction according to the type code
-    }
-
-    pub fn set_callsign(&mut self, msg: Squitter) -> () {
+    pub fn set_callsign(&mut self, msg: &Squitter) -> () {
         //update the callsign (using module data_treatment::identification)
         self.callsign = callsign(msg.get_data());
     }
 
-    pub fn pairing(&self) -> () {
+    pub fn pairing(&self, msg: &Squitter) -> () {
         //update the tuple self.data_pos with a new data
+
     }
 
     pub fn set_position(&mut self) -> () {
@@ -77,20 +91,29 @@ impl Plane {
         //add a position record to the history
     }
 
-    pub fn set_altitude(&mut self, msg: Squitter) -> () {
+    pub fn set_altitude_baro(&mut self, msg: &Squitter) -> () {
         //set the plane's position
         self.altitude = altitude_barometric(msg.get_data());
+    }
+
+    pub fn set_altitude_gnss(&mut self, msg: &Squitter) -> () {
+        //set the plane's position
+        self.altitude = altitude_gnss(msg.get_data());
+    }
+
+    pub fn set_speed(&self, msg: &Squitter) -> () {
+        //add a speed record to the history
     }
 
     pub fn add_speed(&self) -> () {
         //add a speed record to the history
     }
 
-    pub fn get_complement(&self) -> () {
+    pub fn get_complement(&self, msg: &Squitter) -> () {
         //call the database to have supplementary informations
     }
 
-    pub fn set_wvc(&mut self, msg: Squitter) -> () {
+    pub fn set_wvc(&mut self, msg: &Squitter) -> () {
         //use the first squitter receive from a plane to get the wake vortex category
         let val: (u32,u32) = (msg.get_tc(), msg.get_ca());
         self.wake_vortex_cat=  match val {
@@ -117,6 +140,9 @@ impl Plane {
 
     pub fn display(&self) -> () {
         //quick display of the plane information
-        println!("l'adress icao de l'avion est {}", self.icao);
+        println!("nouvel avion -------------------------------------");
+        println!("icao : {}", self.icao);
+        println!("wake vortex category : {}", self.wake_vortex_cat);
+
     }
 }
