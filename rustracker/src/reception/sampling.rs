@@ -1,24 +1,22 @@
 #![allow(dead_code)]
 use crate::object::squitter::Squitter;
-
-pub fn init_device()-> (rtlsdr_mt::Controller, rtlsdr_mt::Reader) {
-    let (mut ctl, rdr) = rtlsdr_mt::open(0).unwrap();
-    ctl.set_center_freq(1090_000_000).unwrap();
-    ctl.set_ppm(130).unwrap();
-    ctl.set_sample_rate(2_000_000).unwrap();
-    ctl.enable_agc().unwrap();
-    println!("frequence : {}",ctl.center_freq());
-    println!("gain : {}",ctl.tuner_gain());
+use std::io::{self, BufReader, BufWriter, Read, Write, ErrorKind};
+use num_complex::Complex;
 
 
-    return (ctl,rdr)
+pub fn init_device(channel: usize)-> soapysdr::Device {
+    let source = soapysdr::Device::new("type=null").unwrap();
+    source.set_frequency(soapysdr::Direction::Rx, channel, 1090_000_000_f64, "IGNORE").expect("failed to set frequency");
+    source.set_sample_rate(soapysdr::Direction::Rx, channel, 2_000_000_f64).expect("failed to set sample rate");
+    source.set_gain_mode(soapysdr::Direction::Rx, channel, true).expect("failed to set gain on auto");
+    return source;
 }
 
-pub fn amp(bytes: &[u8])-> Vec<f64> {
-    let n = bytes.len();
+pub fn amp(iq_sample: &[Complex<f32>])-> Vec<f64> {
+    let n = iq_sample.len();
     let mut samples: Vec<f64> = vec!();
-    for i in (0..(n-2)).step_by(2) {
-        samples.push((((bytes[i] as u32).pow(2) + (bytes[i+1] as u32).pow(2)) as f64).sqrt())
+    for i in 0..n {
+        samples.push(iq_sample[i].norm() as f64);
     }
     return samples;
 }

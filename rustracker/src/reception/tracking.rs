@@ -9,6 +9,9 @@ use super::sampling::extraction;
 use super::sampling::amp;
 use super::sampling::sample2binary;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
+use num_complex::Complex;
+use std::io::{self, BufReader, BufWriter, Read, Write, ErrorKind};
+use std::fs::File;
 
 
 const CHUNKS_NUMBER: u32 = 16;
@@ -24,10 +27,24 @@ impl Track {
         Self {track_list: HashMap::new()}
     }
 
-    pub fn tracking(&mut self)-> () {
-        let (ctl, mut rdr) = init_device();
+    pub fn tracking(&mut self, channel: usize)-> () {
+        print!("a");
+        let source = init_device(channel);
+        print!("b");
+        let mut stream = source.rx_stream::<Complex<f32>>(&[channel]).unwrap();
+        print!("c");
+        let mut buf = vec![Complex::new(0.0, 0.0); stream.mtu().unwrap()];
+        print!("d");
+        stream.activate(None).expect("failed to activate stream");
+        print!("e");
 
-        rdr.read_async(15, 32_000*2, |bytes| {self.add_track(amp(bytes));}).unwrap();
+        loop {
+            let read_size = buf.len();
+            //stream.read return the nomber of samples read in addition to start the reading
+            let buf_len = stream.read(&[&mut buf[..read_size]], 1_000_000).expect("read failed");
+            let samples = amp(&buf[..buf_len]);
+            self.add_track(samples)
+        } 
     }
 
     fn add_track(&mut self, samples: Vec<f64>) ->() {

@@ -6,4 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rtlsdr_mt = "2.1.0"
+soapysdr = "0.3.2"
+num-complex = "0.4.0"
+signalbool = "0.2.4"
