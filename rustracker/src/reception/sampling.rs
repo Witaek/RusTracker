@@ -5,7 +5,8 @@ use num_complex::Complex;
 
 
 pub fn init_device(channel: usize)-> soapysdr::Device {
-    let source = soapysdr::Device::new("type=null").unwrap();
+    println!("init device");
+    let source = soapysdr::Device::new("driver=rtlsdr").unwrap();
     source.set_frequency(soapysdr::Direction::Rx, channel, 1090_000_000_f64, "IGNORE").expect("failed to set frequency");
     source.set_sample_rate(soapysdr::Direction::Rx, channel, 2_000_000_f64).expect("failed to set sample rate");
     source.set_gain_mode(soapysdr::Direction::Rx, channel, true).expect("failed to set gain on auto");
@@ -18,7 +19,7 @@ pub fn amp(iq_sample: &[Complex<f32>])-> Vec<f64> {
     for i in 0..n {
         samples.push(iq_sample[i].norm() as f64);
     }
-    return samples;
+    return samples;   
 }
 
 pub fn extraction(samples: Vec<f64>)-> Vec<[f64;224]> {

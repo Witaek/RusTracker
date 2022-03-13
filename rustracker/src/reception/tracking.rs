@@ -28,22 +28,17 @@ impl Track {
     }
 
     pub fn tracking(&mut self, channel: usize)-> () {
-        print!("a");
         let source = init_device(channel);
-        print!("b");
         let mut stream = source.rx_stream::<Complex<f32>>(&[channel]).unwrap();
-        print!("c");
         let mut buf = vec![Complex::new(0.0, 0.0); stream.mtu().unwrap()];
-        print!("d");
         stream.activate(None).expect("failed to activate stream");
-        print!("e");
 
         loop {
             let read_size = buf.len();
             //stream.read return the nomber of samples read in addition to start the reading
             let buf_len = stream.read(&[&mut buf[..read_size]], 1_000_000).expect("read failed");
             let samples = amp(&buf[..buf_len]);
-            self.add_track(samples)
+            self.add_track(samples);
         } 
     }
 

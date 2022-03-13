@@ -12,9 +12,7 @@ use crate::reception::sampling::amp;
 
 //main
 fn main() {
-    print!("aa");
     let mut radar1 = Track::new();
-    print!("bb");
     radar1.tracking(0);
 }
 
