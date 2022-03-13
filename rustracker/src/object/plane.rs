@@ -15,16 +15,17 @@ pub struct Plane {
     complement: String,                         //complementary information about the plane (from a database) [type string temporaire]
     callsign: String,                           //callsign of the flight  
     position: (f32,f32),                        //actual position of the plane (longitude, latitude)
+    pos_flag: (bool,bool),                      //true if even and odd msg have been detected
     altitude: u32,                              //altitude of the plane
     speed: (u32,f32,i32,String),                //speed, track angle, vertical speed, speed type
     wake_vortex_cat: String,
     
     //past data
-    position_history: Vec<(f32, f32, u32)>,      //historical of all past position
+    position_history: Vec<(f32, f32, u32)>,     //historical of all past position
     speed_history: Vec<(u32,f32,i32,String)>,   //historical of all past speed
     
     //usefull binary msg or data
-    data_pos: (Squitter,Squitter)                   //tuple of most recent odd and even data from positional messages
+    data_pos: (Squitter,Squitter)               //tuple of most recent even and odd data from positional messages
 
     //[A PREVOIR] ajout de la gestion de la distance de l'avion à une ou plusieurs sources
 }
@@ -48,6 +49,7 @@ impl Plane {
             speed_history: vec![],
             
             data_pos: (Squitter::default(),Squitter::default()),
+            pos_flag: (false,false),
         };
         n.set_wvc(msg);
         n.get_complement(msg);
@@ -59,8 +61,8 @@ impl Plane {
         //use a received Squitter to call the adequate fonction according to the type code
         match msg.get_tc() {
             1..=4 => if self.callsign == String::from("") {self.set_callsign(&msg)},
-            9..=18 => {self.pairing(&msg); self.set_position(); self.set_altitude_baro(&msg); self.add_position();},
-            20..=22 => {self.pairing(&msg); self.set_position(); self.set_altitude_gnss(&msg); self.add_position();},
+            9..=18 => {self.set_altitude_baro(&msg); self.pairing(msg); self.set_position();  self.add_position();},
+            20..=22 => {self.set_altitude_gnss(&msg); self.pairing(msg); self.set_position();  self.add_position();},
             19 => {self.set_speed(&msg); self.add_speed();},
             _=>(),
         }
@@ -71,18 +73,19 @@ impl Plane {
         self.callsign = callsign(msg.get_data());
     }
 
-    pub fn pairing(&self, msg: &Squitter) -> () {
+    pub fn pairing(&mut self, msg: Squitter) -> () {
         //update the tuple self.data_pos with a new data
+        if msg.msg[54]==false   {self.data_pos.0 = msg; self.pos_flag.0 = true;println!("even");}
+        else                    {self.data_pos.1 = msg; self.pos_flag.1 = true;println!("odd");}
 
     }
 
     pub fn set_position(&mut self) -> () {
         //set the plane's position
-        let (even_msg, odd_msg) = &self.data_pos;
-        let even_data = even_msg.get_data();
-        let odd_data = odd_msg.get_data();
-
-        if (even_data != &[false; 56]) && (odd_data != &[false; 56]) {      //an array full of false is the default squitter [TEST TO BE OPTIMISED]
+        if self.pos_flag.0 && self.pos_flag.1 {     //if we have a even and odd message
+            let (even_msg, odd_msg) = &self.data_pos;
+            let even_data = even_msg.get_data();
+            let odd_data = odd_msg.get_data();
             self.position = coor(even_data, odd_data);
         }
     }
@@ -140,9 +143,11 @@ impl Plane {
 
     pub fn display(&self) -> () {
         //quick display of the plane information
-        println!("nouvel avion -------------------------------------");
-        println!("icao : {}", self.icao);
-        println!("wake vortex category : {}", self.wake_vortex_cat);
-
+        println!("---------------------------------------------------------------------");
+        println!("icao :        {}", self.icao);
+        println!("callsign :    {}", self.callsign);
+        println!("wvc :         {}", self.wake_vortex_cat);
+        println!("altitude :    {}", self.altitude);
+        println!("position :    {:?}", self.position);
     }
 }
