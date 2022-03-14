@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![allow(unused_variables)]
 
 use crate::ressources::binary_fun::bin2dec;
 use std::convert::TryInto;
