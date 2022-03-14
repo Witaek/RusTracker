@@ -67,7 +67,7 @@ pub fn sample2binary(packets: Vec<[f64;224]>) -> Vec<Squitter> {
                 continue;
             }
         }
-        binaries.push(s);
+        if s.crc_check() {binaries.push(s);}
     }
     return binaries;
 }

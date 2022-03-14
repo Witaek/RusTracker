@@ -100,8 +100,11 @@ impl Plane {
         }
     }
 
-    pub fn add_position(&self) -> () {
+    pub fn add_position(&mut self) -> () {
         //add a position record to the history
+        let (lat, lon) = self.position.clone();
+        let alt = self.altitude.clone();
+        self.position_history.push((lat,lon, alt));
     }
 
     pub fn set_altitude_baro(&mut self, msg: &Squitter) -> () {

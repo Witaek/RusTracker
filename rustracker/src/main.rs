@@ -15,4 +15,3 @@ fn main() {
     let mut radar1 = Track::new();
     radar1.tracking(0);
 }
-

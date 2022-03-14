@@ -14,10 +14,6 @@ use std::io::{self, BufReader, BufWriter, Read, Write, ErrorKind};
 use std::fs::File;
 
 
-const CHUNKS_NUMBER: u32 = 16;
-const BYTES_NUMBER: u32 = 32000;
-
-
 pub struct Track {
     track_list: HashMap<String,Plane>,
 }
@@ -51,8 +47,7 @@ impl Track {
 
     fn update_track(&mut self, s: Squitter) {
         //cette fonction doit mettre à jour ou ajouter un avion (Plane) de l'attribut tracklist de self
-        if s.crc_check() && s.get_df()==17 {
-            println!("crc vrai");
+        if s.get_df()==17 {
             let plane = match self.track_list.entry(s.get_adress()) {
                 Vacant(entry) => entry.insert(Plane::new(&s)),
                 Occupied(entry) => entry.into_mut(),
