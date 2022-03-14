@@ -49,7 +49,7 @@ impl Squitter {
         let mut i = 0;
         while i < (112-24) {
             let bit0 = msgc[i];
-            if !bit0 {i+=1;}
+            if bit0==false{i+=1;}
             else {
                 for k in 0..25 {
                     msgc[i+k] = msgc[i+k] ^ poly[k]; //operation XOR

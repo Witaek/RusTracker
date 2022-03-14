@@ -24,7 +24,7 @@ fn cut_in_sections(msg: &[bool; 56]) -> [&[bool];12] {
 
     arr
 }
-pub fn speed(msg: &[bool;56]) -> f32 {
+pub fn speed(msg: &[bool;56]) -> (f32, String) {
 
     let data = cut_in_sections(msg);
     let sub_type = bin2dec(data[1]);
@@ -50,7 +50,7 @@ pub fn speed(msg: &[bool;56]) -> f32 {
 
         let v: f32 = ((vy.pow(2) + vx.pow(2)) as f32).sqrt();
 
-        return v;
+        (v, "GS".to_owned())
     } else if &sub_type == &3 || &sub_type == &4 {
 
         //let sh: u32 = bin2dec(data[5][0..1].try_into().expect("slice with incorrect length"));                      //Status bit for magnetic heading
@@ -60,7 +60,7 @@ pub fn speed(msg: &[bool;56]) -> f32 {
         
 
         let v = (air_speed - 1) as f32;
-        v
+        (v, "TAS".to_owned())
     } else {
         panic!("wrong speed sub_type")
     }
