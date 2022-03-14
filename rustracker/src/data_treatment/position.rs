@@ -5,6 +5,10 @@ use crate::ressources::binary_fun::bin2dec;
 const PI: f32 = std::f32::consts::PI;
 const NZ: f32 = 15.;
 
+fn modulo(x: &f32,y: &f32) -> f32 { //modulo in rust return negative value, so must be redefine
+    return x-y*(x/y).floor();
+}
+
 //NL return the nomber of longitude zone corresponding with the latitude
 fn nl_calcul(&lat: &f32) -> f32 {
     if lat == 87. || lat == -87. {
@@ -41,20 +45,22 @@ pub fn coor(even_data: &[bool; 56], odd_data: &[bool; 56]) -> (f32,f32) {
     //index j calcul
     let j = j_calcul(&cpr_lat_even, &cpr_lat_odd);
 
-    let mut lat_even = d_lat_even * ((j % 60.) + cpr_lat_even);
-    let mut lat_odd = d_lat_odd * ((j % 60.) + cpr_lat_odd);
+    let lat_even = d_lat_even * (modulo(&j,&60.) + cpr_lat_even);
+    let lat_odd = d_lat_odd * (modulo(&j,&60.) + cpr_lat_odd);
 
-    //value correction
-    if lat_even >= 270. {lat_even -= 360.};
-    if lat_odd >= 270. {lat_odd -= 360.};
+    
 
     //we keep the latitude of the most recent data according the time stamp
-    let lat = 
+    let mut lat = 
         if get_t(even_data) >= get_t(odd_data) {
             lat_even
         } else {
             lat_odd
         };
+    
+    //value correction
+    if lat >= 270. {lat -= 360.};
+    
     
     let nl = nl_calcul(&lat);
 

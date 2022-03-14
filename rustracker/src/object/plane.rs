@@ -61,9 +61,19 @@ impl Plane {
         //use a received Squitter to call the adequate fonction according to the type code
         match msg.get_tc() {
             1..=4 => if self.callsign == String::from("") {self.set_callsign(&msg)},
-            9..=18 => {self.set_altitude_baro(&msg); self.pairing(msg); self.set_position();  self.add_position();},
-            20..=22 => {self.set_altitude_gnss(&msg); self.pairing(msg); self.set_position();  self.add_position();},
-            19 => {self.set_speed(&msg); self.add_speed();},
+            9..=18 => {
+                self.set_altitude_baro(&msg);
+                self.pairing(msg);
+                self.set_position();
+                self.add_position();},
+            20..=22 => {
+                self.set_altitude_gnss(&msg);
+                self.pairing(msg);
+                self.set_position();
+                self.add_position();},
+            19 => {
+                self.set_speed(&msg);
+                self.add_speed();},
             _=>(),
         }
     }
@@ -75,8 +85,8 @@ impl Plane {
 
     pub fn pairing(&mut self, msg: Squitter) -> () {
         //update the tuple self.data_pos with a new data
-        if msg.msg[54]==false   {self.data_pos.0 = msg; self.pos_flag.0 = true;println!("even");}
-        else                    {self.data_pos.1 = msg; self.pos_flag.1 = true;println!("odd");}
+        if msg.msg[54]==false   {self.data_pos.0 = msg; self.pos_flag.0 = true; println!("even");}
+        else                    {self.data_pos.1 = msg; self.pos_flag.1 = true; println!("odd");}
 
     }
 
