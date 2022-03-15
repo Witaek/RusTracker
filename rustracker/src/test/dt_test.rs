@@ -83,11 +83,11 @@ mod tests_speed {
 
     #[test]
     fn speed_works() {
-        println!("Speed subtype1 : {} kt", speed(&TYPE_1));
-        println!("Speed subtype3 : {} kt", speed(&TYPE_3));
+        println!("Speed subtype1 : {:?} ", speed(&TYPE_1));
+        println!("Speed subtype3 : {:?} ", speed(&TYPE_3));
 
-        assert_eq!(speed(&TYPE_1), 159.20113);
-        assert_eq!(speed(&TYPE_3), 375.);
+        assert_eq!(speed(&TYPE_1), (159.20113, "GNSS".to_owned(), -832., "GS".to_owned()));
+        assert_eq!(speed(&TYPE_3), (375., "Barometric".to_owned(), -2304., "TAS".to_owned()));
 
     }
 }

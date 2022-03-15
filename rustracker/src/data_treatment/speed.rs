@@ -24,7 +24,7 @@ fn cut_in_sections(msg: &[bool; 56]) -> [&[bool];12] {
 
     arr
 }
-pub fn speed(msg: &[bool;56]) -> (f32, String) {
+pub fn speed(msg: &[bool;56]) -> (f32, String, f32, String) {
 
     let data = cut_in_sections(msg);
     let sub_type = bin2dec(data[1]);
@@ -51,7 +51,10 @@ pub fn speed(msg: &[bool;56]) -> (f32, String) {
         let mut v: f32 = ((vy.pow(2) + vx.pow(2)) as f32).sqrt();
         if &sub_type == &2 {v = 4.0 * v}
 
-        (v, "GS".to_owned())
+        let vr = vertical_speed(&data[6].try_into().expect("slice with incorrect length"), &data[7].try_into().expect("slice with incorrect length"), &data[8].try_into().expect("slice with incorrect length"));
+
+        (v, vr.1, vr.0, String::from("GS"))
+
     } else if &sub_type == &3 || &sub_type == &4 {
 
         //let sh: u32 = bin2dec(data[5][0..1].try_into().expect("slice with incorrect length"));                      //Status bit for magnetic heading
@@ -63,9 +66,26 @@ pub fn speed(msg: &[bool;56]) -> (f32, String) {
         let mut v = (air_speed - 1) as f32;
         if &sub_type == &4 {v = 4.0 * v}
 
-        (v, "TAS".to_owned())
+        let vr = vertical_speed(&data[6].try_into().expect("slice with incorrect length"), &data[7].try_into().expect("slice with incorrect length"), &data[8].try_into().expect("slice with incorrect length"));
+
+
+        (v, vr.1, vr.0, String::from("TAS"))
     } else {
         panic!("wrong speed sub_type")
     }
 }
 
+pub fn vertical_speed(vbit: &[bool;1], vsign: &[bool;1], vrate: &[bool;9]) -> (f32, String) {
+
+    let vs = match vsign[0] {
+        false => 64. * (bin2dec(vrate)-1) as f32,
+        true => -64. * (bin2dec(vrate) as f32  -1.),
+    };
+
+    let source = match vbit[0] {
+        false => String::from("GNSS"),
+        true => String::from("Barometric"),
+    };
+
+    (vs, source)
+}
