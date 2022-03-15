@@ -48,7 +48,8 @@ pub fn speed(msg: &[bool;56]) -> (f32, String) {
             _ => panic!("dns different from 0 or 1"),
         };
 
-        let v: f32 = ((vy.pow(2) + vx.pow(2)) as f32).sqrt();
+        let mut v: f32 = ((vy.pow(2) + vx.pow(2)) as f32).sqrt();
+        if &sub_type == &2 {v = 4.0 * v}
 
         (v, "GS".to_owned())
     } else if &sub_type == &3 || &sub_type == &4 {
@@ -59,7 +60,9 @@ pub fn speed(msg: &[bool;56]) -> (f32, String) {
         let air_speed: i32 = bin2dec(data[5][12..].try_into().expect("slice with incorrect length")) as i32;          //air-speed
         
 
-        let v = (air_speed - 1) as f32;
+        let mut v = (air_speed - 1) as f32;
+        if &sub_type == &4 {v = 4.0 * v}
+
         (v, "TAS".to_owned())
     } else {
         panic!("wrong speed sub_type")
