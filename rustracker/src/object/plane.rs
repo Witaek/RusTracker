@@ -164,7 +164,7 @@ impl Plane {
         println!("wvc :         {}", self.wake_vortex_cat);
         println!("altitude :    {}", self.altitude);
         println!("position :    {:?}", self.position);
-        println!("speed :    {} kt, {}", self.speed.0,self.speed.1);
+        println!("speed :       {} kt, {}", self.speed.0,self.speed.1);
 
     }
 }
