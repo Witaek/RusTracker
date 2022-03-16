@@ -43,19 +43,19 @@ mod tests_squitter {
     use super::*;
 
     #[test]
-    fn squitter1_work() {
+    fn squitter1_works() {
         let s1: Squitter = Squitter {msg: MSG1};
         assert_eq!(true, s1.crc_check());
     }
 
     #[test]
-    fn squitter2_work() {
+    fn squitter2_works() {
         let s2: Squitter = Squitter {msg: MSG2};
         assert_eq!(true, s2.crc_check());
     }
 
     #[test]
-    fn squitter3_work() {
+    fn squitter3_works() {
         let s3: Squitter = Squitter {msg: MSG3};
         assert_eq!(true, s3.crc_check());
     }
