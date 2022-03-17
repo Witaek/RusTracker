@@ -87,4 +87,31 @@ Avancement dans l'apprentissage du RUST
   * Backend : test des fonctions sur plusieurs messages binaires, réception des messages, démodulation (traitement I&Qs)
   * Frontend : Afficher une carte avec des points mouvants, possibilité d'afficher les infos sur les points (vitesse, position, etc)
 
+---
+
+### Réunion du 16/03/22 (point rencontre)  
+
+* Discussion autour des bases de données : se tourner vers SQLLite3 plutôt 
+* Clarifier le code aux endroits où il devient un peu lourd et peu intuitif (cf tracking.rs)
+* Regarder des librairies de logging pour éventuellement générer des logs
+* Possibilité d'utiliser la docu rust pour notre livrable final
+* Problème réglé pour imgui :
+  * sudo apt install libxcb-render*
+  * sudo apt install libxcb-xfixes*
+  * sudo apt install libxcb-shape*
+* Discussion autour de l'interface graphique, il faut choisir entre :  
+  * imgui qui fonctionnerait avec ZeroMQ : il faut chercher comment générer une carte (openstreetmap), les tiles
+  * interface web avec HTML/CSS, Javascript : utilisation de leaflet pour générer facilement une carte, utiliser des websockets pour communiquer entre back/front
+
+#### Objectifs pour la semaine prochaine (libvrable 2) :  
+
+* Se décider sur l'interface graphique
+* Finaliser (ou presque) le livrable 2, à savoir :  
+  * Backend : réception, démodulation, et interprétation des messages ADS-B --> FAIT
+  * Frontend : générer une carte, avec à minima des points dynamiques et la possibilité d'afficher leur vitesse, position etc...
+* Clarifier la partie réception du code
+* Voir les histoires de position avec un seul message
+
+---
+
 *Dans ce document, nous décrirons le travail effectué chaque semaine ainsi que les objectifs pour la semaine d'après.*
