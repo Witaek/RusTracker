@@ -7,6 +7,7 @@ mod data_treatment;
 mod object;
 mod ressources;
 mod reception;
+mod stream;
 use crate::object::squitter::Squitter;
 use crate::reception::tracking::Track;
 mod test;

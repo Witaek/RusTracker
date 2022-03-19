@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 soapysdr = "0.3.2"
 num-complex = "0.4.0"
-signalbool = "0.2.4"
+zmq = "0.9"

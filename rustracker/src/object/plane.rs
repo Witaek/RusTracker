@@ -4,6 +4,8 @@
 //CODE IN DEVELOPPEMENT [NOT WORKING]
 
 use super::squitter::Squitter;
+use crate::stream::notice::Notice;
+use crate::stream::notice::NT;
 use crate::data_treatment::identification::callsign;
 use crate::data_treatment::position::coor;
 use crate::data_treatment::position::altitude_barometric;
@@ -60,23 +62,34 @@ impl Plane {
 
     pub fn update_plane(&mut self, msg: Squitter) -> () {
         //use a received Squitter to call the adequate fonction according to the type code
-        match msg.get_tc() {
-            1..=4 => if self.callsign == String::from("") {self.set_callsign(&msg)},
+        let note: Notice = match msg.get_tc() {
+            1..=4 if self.callsign == String::from("") => {
+                self.set_callsign(&msg);
+                self.not_callsign()},
             9..=18 => {
                 self.set_altitude_baro(&msg);
                 self.pairing(msg);
                 self.set_position();
-                self.add_position();},
+                self.add_position();
+                self.not_pos()},
             20..=22 => {
                 self.set_altitude_gnss(&msg);
                 self.pairing(msg);
                 self.set_position();
-                self.add_position();},
+                self.add_position();
+                self.not_pos()},
             19 => {
                 self.set_speed(&msg);
-                self.add_speed();},
-            _=>(),
-        }
+                self.add_speed();
+                self.not_speed()},
+            _=>Notice{nt: NT::N, icao: "".to_owned(), data: "".to_owned()},
+        };
+
+        //sending message via ZeroMQ
+        match note.nt {
+            NT::N   =>  (),
+            _       =>  note.send(),
+        };
     }
 
     pub fn set_callsign(&mut self, msg: &Squitter) -> () {
@@ -166,5 +179,35 @@ impl Plane {
         println!("position :    {:?}", self.position);
         println!("speed :       {} kt | {} : {} ft/min | {}", self.speed.0,self.speed.1, self.speed.2, self.speed.3);
 
+    }
+
+    pub fn not_callsign(&self) -> Notice {
+        return Notice {
+            nt: NT::C,
+            icao: self.icao.clone(),
+            data: self.callsign.clone(),
+        }
+    }
+
+    pub fn not_pos(&self) -> Notice {
+        let mut info = self.position.0.to_string();
+        info.push_str("|");
+        info.push_str(&self.position.1.to_string());
+        info.push_str("|");
+        info.push_str(&self.altitude.to_string());
+        return Notice {
+            nt: NT::C,
+            icao: self.icao.clone(),
+            data: info.to_owned(),
+        }
+    }
+
+    pub fn not_speed(&self) -> Notice {
+        let info = "".to_owned();
+        return Notice {
+            nt: NT::C,
+            icao: self.icao.clone(),
+            data: info,
+        }
     }
 }
