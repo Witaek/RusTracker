@@ -1,4 +1,6 @@
 //struct Notice is used to normalise the message format we send with ZeroMQ
+use zmq::Socket;
+
 
 pub enum NT {   //notice type
     P,              //for position msg
@@ -29,7 +31,8 @@ impl Notice {
         return res;
     }
 
-    pub fn send(&self)-> () {
+    pub fn send(&self, sock: &Socket)-> () {
+        sock.send(&self.into_string(), 0).unwrap();
 
     }
 }

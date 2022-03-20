@@ -11,6 +11,8 @@ use crate::data_treatment::position::coor;
 use crate::data_treatment::position::altitude_barometric;
 use crate::data_treatment::position::altitude_gnss;
 use crate::data_treatment::speed::speed;
+use zmq::Socket;
+
 
 pub struct Plane {
     //definition of characteristic attributes of the plane
@@ -60,7 +62,7 @@ impl Plane {
         return n;
     }
 
-    pub fn update_plane(&mut self, msg: Squitter) -> () {
+    pub fn update_plane(&mut self, msg: Squitter, sock: &Socket) -> () {
         //use a received Squitter to call the adequate fonction according to the type code
         let note: Notice = match msg.get_tc() {
             1..=4 if self.callsign == String::from("") => {
@@ -88,7 +90,7 @@ impl Plane {
         //sending message via ZeroMQ
         match note.nt {
             NT::N   =>  (),
-            _       =>  note.send(),
+            _       =>  note.send(sock),
         };
     }
 
@@ -196,7 +198,7 @@ impl Plane {
         info.push_str("|");
         info.push_str(&self.altitude.to_string());
         return Notice {
-            nt: NT::C,
+            nt: NT::P,
             icao: self.icao.clone(),
             data: info.to_owned(),
         }
@@ -205,7 +207,7 @@ impl Plane {
     pub fn not_speed(&self) -> Notice {
         let info = "".to_owned();
         return Notice {
-            nt: NT::C,
+            nt: NT::S,
             icao: self.icao.clone(),
             data: info,
         }
