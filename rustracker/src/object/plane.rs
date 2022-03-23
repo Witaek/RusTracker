@@ -205,11 +205,19 @@ impl Plane {
     }
 
     pub fn not_speed(&self) -> Notice {
-        let info = "".to_owned();
+        let info = &self.speed.0.to_string();
+        info.push_str("|");
+        info.push_str(&self.position.1);
+        info.push_str("|");
+        info.push_str(&self.position.2.to_string());
+        info.push_str("|");
+        info.push_str(&self.position.3);
+
+
         return Notice {
             nt: NT::S,
             icao: self.icao.clone(),
-            data: info,
+            data: info.to_owned(),
         }
     }
 }
