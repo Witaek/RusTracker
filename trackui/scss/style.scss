@@ -1,0 +1,41 @@
+@import "normalize";
+
+html,
+body {
+  box-sizing: border-box;
+}
+
+body {
+  // those styles are irrelevant, just here for nicer presentation
+  display: flex;
+  flex-direction: column;
+
+  #yew {
+    height: 1000px;
+    width: 1200px;
+    margin: 2em auto;
+  }
+
+  .map {
+    height: 800px;
+  }
+
+  .component-container {
+    border-radius: 0.5em;
+    padding: 1em;
+  }
+
+  .map-container {
+    border: 1px solid red;
+    margin-bottom: 1em;
+  }
+
+  .control {
+    text-align: center;
+    border: 1px solid green;
+
+    button {
+      margin: 0.5em;
+    }
+  }
+}
