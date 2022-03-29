@@ -32,7 +32,6 @@ impl Notice {
     }
 
     pub fn send(&self, sock: &Socket)-> () {
-        sock.send(&self.into_string(), 0).unwrap();
-
+        sock.send_str(&self.into_string(), 0);
     }
 }
