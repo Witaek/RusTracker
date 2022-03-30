@@ -114,4 +114,20 @@ Avancement dans l'apprentissage du RUST
 
 ---
 
+### Réunion du 29/03/2022 (rapide) :  
+
+* Choix d'utiliser Yew et leaflet-rs pour l'interface graphique
+* Prise en main de Yew et leaflet-rs, quelques difficultées rencontrées (à voir au point rencontre du 31/03)
+* ZeroMQ : grâce à l'exemple fournit par  Rémy Grünblatt un code minimal d'emission/reception serveur/client a été mis au point et fonctionne correctement (pour l'instant en local)
+* Point rencontre encadrant pour régler quelques problèmes liés à l'interface graphique : 31/03/2022 à 8h
+
+
+#### Objectifs pour la semaine prochaine :
+
+* Réussir à afficher une icone d'avion et à gérer sa position sur la carte
+* Gérer proprement la réception des messages côté client
+* Gérer l'affichage des données côté client
+
+---
+
 *Dans ce document, nous décrirons le travail effectué chaque semaine ainsi que les objectifs pour la semaine d'après.*
