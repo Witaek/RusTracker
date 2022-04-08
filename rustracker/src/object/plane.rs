@@ -12,7 +12,8 @@ use crate::data_treatment::position::altitude_barometric;
 use crate::data_treatment::position::altitude_gnss;
 use crate::data_treatment::speed::speed;
 use zmq::Socket;
-
+use tungstenite::{Message, WebSocket};
+use std::net::*;
 
 pub struct Plane {
     //definition of characteristic attributes of the plane
@@ -62,7 +63,7 @@ impl Plane {
         return n;
     }
 
-    pub fn update_plane(&mut self, msg: Squitter, sock: &Socket) -> () {
+    pub fn update_plane(&mut self, msg: Squitter, sock: &WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>) -> () {
         //use a received Squitter to call the adequate fonction according to the type code
         let note: Notice = match msg.get_tc() {
             1..=4 if self.callsign == String::from("") => {

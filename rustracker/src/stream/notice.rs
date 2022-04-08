@@ -1,5 +1,6 @@
 //struct Notice is used to normalise the message format we send with ZeroMQ
-use zmq::Socket;
+use tungstenite::{Message, WebSocket, protocol};
+use std::net::*;
 
 
 pub enum NT {   //notice type
@@ -31,7 +32,8 @@ impl Notice {
         return res;
     }
 
-    pub fn send(&self, sock: &Socket)-> () {
-        sock.send_str(&self.into_string(), 0);
+    pub fn send(&self, socket: &WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>)-> () {
+        socket.write_message(Message::Text(self.into_string())).unwrap();
+        //socket.send_str(&self.into_string(), 0);
     }
 }

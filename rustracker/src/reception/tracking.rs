@@ -12,8 +12,9 @@ use std::collections::hash_map::Entry::{Occupied, Vacant};
 use num_complex::Complex;
 use std::io::{self, BufReader, BufWriter, Read, Write, ErrorKind};
 use std::fs::File;
-use zmq::Socket;
-
+use tungstenite::{Message, WebSocket};
+use std::net::*;
+use std::borrow::Borrow;
 pub struct Track {
     track_list: HashMap<String,Plane>,
 }
@@ -25,7 +26,7 @@ impl Track {
         }
     }
 
-    pub fn tracking(&mut self, channel: usize, sock: &Socket)-> () {
+    pub fn tracking(&mut self, channel: usize, sock: &WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>)-> () {
         let source = init_device(channel);
         let mut stream = source.rx_stream::<Complex<f32>>(&[channel]).unwrap();
         let mut buf = vec![Complex::new(0.0, 0.0); stream.mtu().unwrap()];
@@ -40,14 +41,14 @@ impl Track {
         } 
     }
 
-    fn add_track(&mut self, samples: Vec<f64>, sock: &Socket) ->() {
+    fn add_track(&mut self, samples: Vec<f64>, sock: &WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>) ->() {
         let binaries = sample2binary(extraction(samples));
         for s in binaries {
             self.update_track(s, sock);
         }
     }
 
-    fn update_track(&mut self, s: Squitter, sock: &Socket) {
+    fn update_track(&mut self, s: Squitter, sock: &WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>) {
         //cette fonction doit mettre à jour ou ajouter un avion (Plane) de l'attribut tracklist de self
         if s.get_df()==17 {
             let plane = match self.track_list.entry(s.get_adress()) {
