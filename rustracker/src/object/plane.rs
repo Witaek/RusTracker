@@ -11,7 +11,6 @@ use crate::data_treatment::position::coor;
 use crate::data_treatment::position::altitude_barometric;
 use crate::data_treatment::position::altitude_gnss;
 use crate::data_treatment::speed::speed;
-use zmq::Socket;
 use tungstenite::{Message, WebSocket};
 use std::net::*;
 
