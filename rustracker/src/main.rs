@@ -23,10 +23,6 @@ fn print_type_of<T>(_: &T) {
 }
 //main
 fn main() {
-
-    let mut socket = connect(Url::parse("ws://localhost:8080").unwrap()).expect("Can't connect").0;
-
-
     println!("Connected to the server");
     
     let mut radar1 = Track::new();
