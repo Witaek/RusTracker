@@ -33,6 +33,6 @@ fn main() {
     let mut radar1 = Track::new();
 
     //ctx is given now and will be send through methods of Track to Notice::send
-    radar1.tracking(0, &socket);
+    radar1.tracking(0);
 
 }

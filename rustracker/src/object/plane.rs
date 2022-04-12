@@ -62,7 +62,7 @@ impl Plane {
         return n;
     }
 
-    pub fn update_plane(&mut self, msg: Squitter, sock: &WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>) -> () {
+    pub fn update_plane(&mut self, msg: Squitter) -> Notice {
         //use a received Squitter to call the adequate fonction according to the type code
         let note: Notice = match msg.get_tc() {
             1..=4 if self.callsign == String::from("") => {
@@ -87,11 +87,7 @@ impl Plane {
             _=>Notice{nt: NT::N, icao: "".to_owned(), data: "".to_owned()},
         };
 
-        //sending message via ZeroMQ
-        match note.nt {
-            NT::N   =>  (),
-            _       =>  note.send(sock),
-        };
+        return note;
     }
 
     pub fn set_callsign(&mut self, msg: &Squitter) -> () {

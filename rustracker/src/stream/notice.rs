@@ -31,9 +31,4 @@ impl Notice {
         res.push_str(&self.data.clone());
         return res;
     }
-
-    pub fn send(&self, socket: &WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>)-> () {
-        socket.write_message(Message::Text(self.into_string())).unwrap();
-        //socket.send_str(&self.into_string(), 0);
-    }
 }

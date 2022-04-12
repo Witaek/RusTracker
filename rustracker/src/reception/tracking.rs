@@ -12,21 +12,27 @@ use std::collections::hash_map::Entry::{Occupied, Vacant};
 use num_complex::Complex;
 use std::io::{self, BufReader, BufWriter, Read, Write, ErrorKind};
 use std::fs::File;
-use tungstenite::{Message, WebSocket};
+use tungstenite::*;
+use url::Url;
 use std::net::*;
 use std::borrow::Borrow;
+use crate::stream::notice::Notice;
+
+
 pub struct Track {
     track_list: HashMap<String,Plane>,
+    sock: WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>
 }
 
 impl Track {
     pub fn new () -> Self {
         Self {
             track_list: HashMap::new(),
+            sock: connect(Url::parse("ws://localhost:8080").unwrap()).expect("Can't connect").0,
         }
     }
 
-    pub fn tracking(&mut self, channel: usize, sock: &WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>)-> () {
+    pub fn tracking(&mut self, channel: usize)-> () {
         let source = init_device(channel);
         let mut stream = source.rx_stream::<Complex<f32>>(&[channel]).unwrap();
         let mut buf = vec![Complex::new(0.0, 0.0); stream.mtu().unwrap()];
@@ -37,26 +43,31 @@ impl Track {
             //stream.read return the nomber of samples read in addition to start the reading
             let buf_len = stream.read(&[&mut buf[..read_size]], 1_000_000).expect("read failed");
             let samples = amp(&buf[..buf_len]);
-            self.add_track(samples, sock);
+            self.add_track(samples);
         } 
     }
 
-    fn add_track(&mut self, samples: Vec<f64>, sock: &WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>) ->() {
+    fn add_track(&mut self, samples: Vec<f64>) ->() {
         let binaries = sample2binary(extraction(samples));
         for s in binaries {
-            self.update_track(s, sock);
+            self.update_track(s);
         }
     }
 
-    fn update_track(&mut self, s: Squitter, sock: &WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>) {
+    fn update_track(&mut self, s: Squitter) {
         //cette fonction doit mettre à jour ou ajouter un avion (Plane) de l'attribut tracklist de self
         if s.get_df()==17 {
             let plane = match self.track_list.entry(s.get_adress()) {
                 Vacant(entry) => entry.insert(Plane::new(&s)),
                 Occupied(entry) => entry.into_mut(),
             };
-            plane.update_plane(s, sock);
+            let note = plane.update_plane(s);
             plane.display();
+            self.send_notice(note)
         }
+    }
+
+    fn send_notice(&mut self, note: Notice) {
+        self.sock.write_message(Message::Text(note.into_string())).unwrap();
     }
 }
