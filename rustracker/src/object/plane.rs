@@ -4,14 +4,9 @@
 //CODE IN DEVELOPPEMENT [NOT WORKING]
 
 use super::squitter::Squitter;
-use crate::stream::notice::Notice;
-use crate::stream::notice::NT;
 use crate::data_treatment::identification::callsign;
-use crate::data_treatment::position::coor;
-use crate::data_treatment::position::altitude_barometric;
-use crate::data_treatment::position::altitude_gnss;
+use crate::data_treatment::position::{coor, altitude_barometric, altitude_gnss};
 use crate::data_treatment::speed::speed;
-use tungstenite::{Message, WebSocket};
 use std::net::*;
 
 pub struct Plane {
@@ -61,33 +56,34 @@ impl Plane {
         println!("nouvel avion");
         return n;
     }
+}
 
-    pub fn update_plane(&mut self, msg: Squitter) -> Notice {
+impl Plane {
+
+    pub fn update_plane(&mut self, msg: Squitter) -> () {
         //use a received Squitter to call the adequate fonction according to the type code
-        let note: Notice = match msg.get_tc() {
+        match msg.get_tc() {
             1..=4 if self.callsign == String::from("") => {
                 self.set_callsign(&msg);
-                self.not_callsign()},
+                },
             9..=18 => {
                 self.set_altitude_baro(&msg);
                 self.pairing(msg);
                 self.set_position();
                 self.add_position();
-                self.not_pos()},
+                },
             20..=22 => {
                 self.set_altitude_gnss(&msg);
                 self.pairing(msg);
                 self.set_position();
                 self.add_position();
-                self.not_pos()},
+                },
             19 => {
                 self.set_speed(&msg);
                 self.add_speed();
-                self.not_speed()},
-            _=>Notice{nt: NT::N, icao: "".to_owned(), data: "".to_owned()},
+                },
+            _=>(),
         };
-
-        return note;
     }
 
     pub fn set_callsign(&mut self, msg: &Squitter) -> () {
@@ -176,44 +172,5 @@ impl Plane {
         println!("altitude :    {}", self.altitude);
         println!("position :    {:?}", self.position);
         println!("speed :       {} kt | {} : {} ft/min | {}", self.speed.0,self.speed.1, self.speed.2, self.speed.3);
-
-    }
-
-    pub fn not_callsign(&self) -> Notice {
-        return Notice {
-            nt: NT::C,
-            icao: self.icao.clone(),
-            data: self.callsign.clone(),
-        }
-    }
-
-    pub fn not_pos(&self) -> Notice {
-        let mut info = self.position.0.to_string();
-        info.push_str("|");
-        info.push_str(&self.position.1.to_string());
-        info.push_str("|");
-        info.push_str(&self.altitude.to_string());
-        return Notice {
-            nt: NT::P,
-            icao: self.icao.clone(),
-            data: info.to_owned(),
-        }
-    }
-
-    pub fn not_speed(&self) -> Notice {
-        let mut info = self.speed.0.to_string();
-        info.push_str("|");
-        info.push_str(&self.speed.1);
-        info.push_str("|");
-        info.push_str(&self.speed.2.to_string());
-        info.push_str("|");
-        info.push_str(&self.speed.3);
-
-
-        return Notice {
-            nt: NT::S,
-            icao: self.icao.clone(),
-            data: info.to_owned(),
-        }
     }
 }

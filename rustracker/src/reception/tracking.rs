@@ -4,54 +4,39 @@
 use std::collections::HashMap;
 use crate::object::plane::Plane;
 use crate::object::squitter::Squitter;
-use super::sampling::init_device;
-use super::sampling::extraction;
-use super::sampling::amp;
-use super::sampling::sample2binary;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
-use num_complex::Complex;
 use std::io::{self, BufReader, BufWriter, Read, Write, ErrorKind};
 use std::fs::File;
-use tungstenite::*;
-use url::Url;
 use std::net::*;
 use std::borrow::Borrow;
-use crate::stream::notice::Notice;
+use zmq::*;
 
 
 pub struct Track {
     track_list: HashMap<String,Plane>,
-    sock: WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>
+    sock: zmq::Socket,
 }
 
 impl Track {
-    pub fn new () -> Self {
+    pub fn new (sock: zmq::Socket) -> Self {
         Self {
             track_list: HashMap::new(),
-            sock: connect(Url::parse("ws://localhost:8080").unwrap()).expect("Can't connect").0,
+            sock,
         }
     }
 
-    pub fn tracking(&mut self, channel: usize)-> () {
-        let source = init_device(channel);
-        let mut stream = source.rx_stream::<Complex<f32>>(&[channel]).unwrap();
-        let mut buf = vec![Complex::new(0.0, 0.0); stream.mtu().unwrap()];
-        stream.activate(None).expect("failed to activate stream");
+    pub fn tracking(&mut self)-> () {
 
         loop {
-            let read_size = buf.len();
-            //stream.read return the nomber of samples read in addition to start the reading
-            let buf_len = stream.read(&[&mut buf[..read_size]], 1_000_000).expect("read failed");
-            let samples = amp(&buf[..buf_len]);
-            self.add_track(samples);
-        } 
-    }
-
-    fn add_track(&mut self, samples: Vec<f64>) ->() {
-        let binaries = sample2binary(extraction(samples));
-        for s in binaries {
+            let msg = self.sock.recv_bytes(0);
+            let s = match msg {
+                Ok(data) => Squitter::from_msg(data),
+                Err(data) => panic!("Erreur de reception"),
+            };
+            println!("{}", s.crc_check());
+            
             self.update_track(s);
-        }
+        } 
     }
 
     fn update_track(&mut self, s: Squitter) {
@@ -61,13 +46,9 @@ impl Track {
                 Vacant(entry) => entry.insert(Plane::new(&s)),
                 Occupied(entry) => entry.into_mut(),
             };
-            let note = plane.update_plane(s);
-            plane.display();
-            self.send_notice(note)
+            plane.update_plane(s);
+            //plane.display();
+            //self.edit_geojson(note)
         }
-    }
-
-    fn send_notice(&mut self, note: Notice) {
-        self.sock.write_message(Message::Text(note.into_string())).unwrap();
     }
 }
