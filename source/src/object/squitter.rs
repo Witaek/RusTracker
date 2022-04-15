@@ -40,10 +40,8 @@ impl Squitter {
     pub fn convert(&self) -> [u8;14] {
         let mut res = [0;14]; 
         for i in 0..(112/8) {
-            res[i]=bin2dec(&self.msg[i..i+8]) as u8
+            res[i]=bin2dec(&self.msg[i*8..i*8+8]) as u8
         }
         return res;
     }
-
-
 }

@@ -4,8 +4,7 @@ mod ressources;
 
 use num_complex::Complex;
 use reception::sampling::{amp, sample2binary, extraction, init_device};
-use crate::object::squitter::Squitter;
-use zmq::{Context, Message, Error, Socket};
+use zmq::{Context, Message};
 
 fn main() {
     let ctx = Context::new();
@@ -33,8 +32,6 @@ pub fn tracking(channel: usize, sock : &zmq::Socket)-> () {
 fn send_squitter(samples: Vec<f64>, socket : &zmq::Socket) ->() {
     let binaries = sample2binary(extraction(samples));
     for s in binaries {
-        println!("{}", s.crc_check());
-        println!("{:?}", s.msg);
         let data = s.convert();
         let msg = Message::from(&data[..]);
         socket.send(msg, 0).unwrap();

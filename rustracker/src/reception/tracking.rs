@@ -33,7 +33,6 @@ impl Track {
                 Ok(data) => Squitter::from_msg(data),
                 Err(data) => panic!("Erreur de reception"),
             };
-            println!("{}", s.crc_check());
             
             self.update_track(s);
         } 
@@ -47,7 +46,7 @@ impl Track {
                 Occupied(entry) => entry.into_mut(),
             };
             plane.update_plane(s);
-            //plane.display();
+            plane.display();
             //self.edit_geojson(note)
         }
     }

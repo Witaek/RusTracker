@@ -10,7 +10,3 @@ pub fn bin2dec(binary: &[bool]) -> u32 {     //binary to decimal conversion usin
     }
     return res;
 }
-
-pub fn bin2hex(binary: &[bool]) -> String {     //binary to decimal conversion using binary as an array of bits (as boolean)
-    return format!("{:x}",bin2dec(&binary))
-}

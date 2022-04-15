@@ -18,15 +18,16 @@ impl Squitter {
 
     pub fn from_msg(msg : Vec<u8>) -> Self {
         let mut s = Squitter::default();
+        let mut msg_string = String::from("");
         for i  in 0..112/8 {
             let bytes = format!("{:08b}", msg[i]);
-            for k in 0..8 {
-                if bytes.get(k..k+1)==Some("1"){
-                    s.msg[i*8+k] = true;
-                }
+            msg_string.push_str(&bytes)
+        }
+        for i in 0..112 {
+            if msg_string.get(i..i+1).unwrap() == "1" {
+                s.msg[i]=true;
             }
         }
-        println!("{:?}", s.msg);
         return s;
     }
 
