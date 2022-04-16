@@ -9,6 +9,11 @@ use crate::data_treatment::position::{coor, altitude_barometric, altitude_gnss};
 use crate::data_treatment::speed::speed;
 use std::net::*;
 
+use geojson::{Feature, FeatureCollection, GeoJson, Geometry, Value, PointType};
+use geojson::feature::Id;
+
+use serde_json::{to_value, Map};
+
 pub struct Plane {
     //definition of characteristic attributes of the plane
     icao: String,                               //icao address
@@ -22,6 +27,7 @@ pub struct Plane {
     
     //past data
     position_history: Vec<(f32, f32, u32)>,     //historical of all past position
+    trajectory: Vec<PointType>,                 //historical formated for geoJSON
     speed_history: Vec<(f32,String, f32,String)>,   //historical of all past speed
     
     //usefull binary msg or data
@@ -46,6 +52,7 @@ impl Plane {
             wake_vortex_cat: "".to_owned(),
             
             position_history: vec![],
+            trajectory: vec![],
             speed_history: vec![],
             
             data_pos: (Squitter::default(),Squitter::default()),
@@ -113,6 +120,8 @@ impl Plane {
         let (lat, lon) = self.position.clone();
         let alt = self.altitude.clone();
         self.position_history.push((lat,lon, alt));
+        let p: PointType = vec![lat as f64,lon as f64];
+        self.trajectory.push(p);
     }
 
     pub fn set_altitude_baro(&mut self, msg: &Squitter) -> () {
@@ -172,5 +181,29 @@ impl Plane {
         println!("altitude :    {}", self.altitude);
         println!("position :    {:?}", self.position);
         println!("speed :       {} kt | {} : {} ft/min | {}", self.speed.0,self.speed.1, self.speed.2, self.speed.3);
+    }
+
+    pub fn into_feat(&self, adress: String) -> Feature {
+        //return tuple of geojson::Feature first for the actual position second for the past trajectory
+        let mut properties = Map::new();
+
+        //add properties
+        let alt_str = self.altitude.to_string();
+        let speed_str = format!("{} kt | {} : {} ft/min | {}", self.speed.0,self.speed.1, self.speed.2, self.speed.3);
+        properties.insert(self.callsign.clone(), to_value("callsign").unwrap());
+        properties.insert(alt_str, to_value("altitude").unwrap());
+        properties.insert(speed_str, to_value("speed").unwrap());
+
+        //add set up geometry
+        let geometry = Geometry::new(Value::LineString(self.trajectory.clone()));
+
+        let feat = Feature {
+            bbox: None,
+            geometry: Some(geometry),
+            id: Some(Id::String(adress)),
+            properties: Some(properties),
+            foreign_members: None,
+        };
+        return feat;
     }
 }
