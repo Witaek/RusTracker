@@ -141,7 +141,7 @@ Avancement dans l'apprentissage du RUST
 --> Artur : s'occupe du frontend, apparence de l'interface web  
 --> Bastian : rédige le rapport sous la forme de rustbook  
 
-#### Obejctifs pour le prochain point :  
+#### Objectifs pour le prochain point :  
 * Absolument avoir une interface graphique minimale : points qui bougent, carte, etc...
 * Gérer la connexion internet du serveur
 * Gérer le côté backend de l'interface graphique (interprétation des messages de position, vitesse, etc afin de positionner les avions sur la carte)
