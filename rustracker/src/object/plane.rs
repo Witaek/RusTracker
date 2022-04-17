@@ -113,7 +113,7 @@ impl Plane {
             let odd_data = odd_msg.get_data();
             self.position = coor(even_data, odd_data);
 
-            let p: PointType = vec![self.position.0 as f64,self.position.1 as f64];
+            let p: PointType = vec![self.position.1 as f64,self.position.0 as f64];
             self.trajectory.push(p);
         }
     }
