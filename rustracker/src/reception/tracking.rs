@@ -5,7 +5,6 @@ use std::collections::HashMap;
 use crate::object::plane::Plane;
 use crate::object::squitter::Squitter;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
-//use std::io::{self, BufReader, BufWriter, Read, Write, ErrorKind};
 use std::net::*;
 use std::borrow::Borrow;
 use zmq::*;
@@ -19,16 +18,19 @@ use tokio::time::{sleep, Duration};
 
 use std::sync::mpsc::{channel, Sender, Receiver};
 
+use geojson::feature::Id;
+
 pub struct Track {
     track_list: HashMap<String,Plane>,
     sock: zmq::Socket,
     pub geojson : FeatureCollection,
-    sender : Sender<String>,
+    sender_msg : Sender<String>,
+    receiver_rm : Receiver<bool>,
 }
 
 
 impl Track {
-    pub fn new(sock: zmq::Socket, sender : Sender<String>) -> Self {
+    pub fn new(sock: zmq::Socket, sender_msg : Sender<String>, receiver_rm : Receiver<bool>) -> Self {
         Self {
             track_list: HashMap::new(),
             sock,
@@ -37,7 +39,8 @@ impl Track {
                 features: vec![],
                 foreign_members: None,
             },
-            sender,
+            sender_msg,
+            receiver_rm,
         }
     }
 
@@ -45,6 +48,12 @@ impl Track {
     pub fn tracking(&mut self) {
 
         loop {
+
+            //if we receive a message from receiver_rm this mean we have to check the tracks to remove the old ones
+            if self.receiver_rm.try_recv().is_ok() {
+                self.remove_old_track();
+            };
+
             let msg = self.sock.recv_bytes(0);
             let s = match msg {
                 Ok(data) => Squitter::from_msg(data),
@@ -79,6 +88,7 @@ impl Track {
             if self.geojson.features[i].id.as_ref().unwrap().eq(&plane_feat.id.as_ref().unwrap()) {
                 self.geojson.features[i] = plane_feat.clone();
                 flag = true;
+                break;
             }
         }
 
@@ -86,6 +96,33 @@ impl Track {
             //add the feature of a new plane
             self.geojson.features.push(plane_feat);
         }
-        self.sender.send(self.geojson.to_string()).unwrap();
+        self.sender_msg.send(self.geojson.to_string()).unwrap();
+    }
+
+    pub fn remove_old_track(&mut self){
+
+        let mut rm_id_list : Vec<String> = vec![];  //list of id to be remove
+
+        for plane in &self.track_list {
+            //set remove minimum to 30 seconds
+            if plane.1.last_msg_time.elapsed().as_secs() >= 30 {
+
+                rm_id_list.push(plane.0.clone());
+
+                //actualise the geojson
+                for i in 0..self.geojson.features.len() {
+                    
+                    if self.geojson.features[i].id.as_ref().unwrap().eq(&Id::String(plane.0.clone())) {
+                        self.geojson.features.remove(i);
+                        break;
+                    }
+                }
+            }
+        }
+
+        //remove from the hashmap
+        for id in rm_id_list {
+            self.track_list.remove(&id);
+        }
     }
 }

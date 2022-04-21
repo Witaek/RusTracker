@@ -14,6 +14,8 @@ use geojson::feature::Id;
 
 use serde_json::{to_value, Map};
 
+use std::time::{Duration, Instant};
+
 pub struct Plane {
     //definition of characteristic attributes of the plane
     icao: String,                               //icao address
@@ -31,7 +33,10 @@ pub struct Plane {
     speed_history: Vec<(f32,String, f32,String)>,   //historical of all past speed
     
     //usefull binary msg or data
-    data_pos: (Squitter,Squitter)               //tuple of most recent even and odd data from positional messages
+    data_pos: (Squitter,Squitter),               //tuple of most recent even and odd data from positional messages
+
+    //time of last message
+    pub last_msg_time: Instant,
 
     //[A PREVOIR] ajout de la gestion de la distance de l'avion à une ou plusieurs sources
 }
@@ -57,6 +62,8 @@ impl Plane {
             
             data_pos: (Squitter::default(),Squitter::default()),
             pos_flag: (false,false),
+
+            last_msg_time: Instant::now(),
         };
         n.set_wvc(msg);
         n.get_complement(msg);
@@ -91,6 +98,11 @@ impl Plane {
                 },
             _=>(),
         };
+        &self.set_time();
+    }
+
+    pub fn set_time(&mut self) {
+        self.last_msg_time = Instant::now();
     }
 
     pub fn set_callsign(&mut self, msg: &Squitter) -> () {

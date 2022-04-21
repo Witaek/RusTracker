@@ -32,24 +32,39 @@ fn main() {
     let sock = ctx.socket(zmq::PULL).unwrap();
     sock.bind(addr).unwrap();
     
+    //use to receive the geojson
+    let (sender_msg,receiver_msg) : (Sender<String>, Receiver<String>) = channel();
 
-    let (sender,receiver) : (Sender<String>, Receiver<String>) = channel();
+    //use to request an update of the tracks to remove the old ones
+    let (sender_rm,receiver_rm) : (Sender<bool>, Receiver<bool>) = channel();
 
-    let mut radar1 = Track::new(sock, sender);
+    let mut radar1 = Track::new(sock, sender_msg, receiver_rm);
 
-    //let mut file = File::create("planes.geojson").unwrap();
+    //create the geojson
     let mut file = OpenOptions::new()
         .write(true)
         .truncate(true)
         .create(true)
         .open("planes.geojson")
         .unwrap();
+    
+    let time_wait = time::Duration::from_secs(30);
+    //removing old tracks
+    thread::spawn (
+        move || {
+            loop {
+                thread::sleep(time_wait);
+                sender_rm.send(true);
+            }
+        }
+    );
+
     //editing the geoJSON
     thread::spawn ( 
         move || {
             loop{
                 thread::sleep(time::Duration::from_millis(1000));
-                let json_content = receiver.recv().unwrap();
+                let json_content = receiver_msg.recv().unwrap();
                 file.seek(SeekFrom::Start(0));
                 file.write_all(json_content.as_bytes()).unwrap();
             }
