@@ -10,6 +10,9 @@
 --> Trianguler de petits avions/helicoptères qui n'envoient pas leur position  
 --> Interface web pour rendre l'app multiplatforme
 
+Permission écriture /var/www/html : sudo chown -R $USER:$USER /var/www
+
+
 #### **Contributeurs :**  
 HONORÉ Guilhem  
 CHAUVE Arthur  
