@@ -15,6 +15,23 @@ impl Default for Squitter {
 }
 
 impl Squitter {
+
+    pub fn from_msg(msg : Vec<u8>) -> Self {
+        let mut s = Squitter::default();
+        let mut msg_string = String::from("");
+        for i  in 0..112/8 {
+            let bytes = format!("{:08b}", msg[i]);
+            msg_string.push_str(&bytes)
+        }
+        for i in 0..112 {
+            if msg_string.get(i..i+1).unwrap() == "1" {
+                s.msg[i]=true;
+            }
+        }
+        return s;
+    }
+
+
     pub fn get_df(&self) -> u32{            //get dowlink format
         return bin2dec(&self.msg[0..5])
     }
@@ -58,6 +75,4 @@ impl Squitter {
         }
         return [false;112]== msgc;
     }
-
-
 }

@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 use crate::object::squitter::Squitter;
-use std::io::{self, BufReader, BufWriter, Read, Write, ErrorKind};
 use num_complex::Complex;
 
 
