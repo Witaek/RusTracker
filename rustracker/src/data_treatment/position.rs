@@ -87,7 +87,7 @@ pub fn coor(even_data: &[bool; 56], odd_data: &[bool; 56]) -> (f32,f32) {
         };
     
     //value correction
-    if lon >= 270. {lon -= 360.};
+    if lon >= 180. {lon -= 360.};
 
     return (lat, lon);
 }
