@@ -86,8 +86,8 @@ mod tests_speed {
         println!("Speed subtype1 : {:?} ", speed(&TYPE_1));
         println!("Speed subtype3 : {:?} ", speed(&TYPE_3));
 
-        assert_eq!(speed(&TYPE_1), (159.20113, "GNSS".to_owned(), -832., "GS".to_owned()));
-        assert_eq!(speed(&TYPE_3), (375., "Barometric".to_owned(), -2304., "TAS".to_owned()));
+        assert_eq!(speed(&TYPE_1), (159.20113, "GNSS".to_owned(), -832., "GS".to_owned(), 182.88039));
+        assert_eq!(speed(&TYPE_3), (375., "Barometric".to_owned(), -2304., "TAS".to_owned(),0.));
 
     }
 }

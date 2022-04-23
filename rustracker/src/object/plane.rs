@@ -22,13 +22,13 @@ pub struct Plane {
     position: (f32,f32),                        //actual position of the plane (longitude, latitude)
     pos_flag: (bool,bool),                      //true if even and odd msg have been detected
     altitude: u32,                              //altitude of the plane
-    speed: (f32, String, f32, String),                        //speed, track angle, vertical speed, speed type
+    speed: (f32, String, f32, String, f32),                        //speed, track angle, vertical speed, speed type
     wake_vortex_cat: String,
     
     //past data
     position_history: Vec<(f32, f32, u32)>,     //historical of all past position
     trajectory: Vec<PointType>,                 //historical formated for geoJSON
-    speed_history: Vec<(f32,String, f32,String)>,   //historical of all past speed
+    speed_history: Vec<(f32,String, f32,String, f32)>,   //historical of all past speed
     
     //usefull binary msg or data
     data_pos: (Squitter,Squitter)               //tuple of most recent even and odd data from positional messages
@@ -48,7 +48,7 @@ impl Plane {
             callsign: "".to_owned(),
             position: (0.,0.),
             altitude: (0),
-            speed: (0.0, String::from("N/A"), 0.0, String::from("")),
+            speed: (0.0, String::from("N/A"), 0.0, String::from(""),0.),
             wake_vortex_cat: "".to_owned(),
             
             position_history: vec![],
@@ -142,8 +142,8 @@ impl Plane {
     }
 
     pub fn add_speed(&mut self) -> () {
-        let (speed, vrtype, vr, speedtype) = self.speed.clone();
-        self.speed_history.push((speed, vrtype, vr, speedtype));
+        let (speed, vrtype, vr, speedtype, trackangle) = self.speed.clone();
+        self.speed_history.push((speed, vrtype, vr, speedtype, trackangle));
     }
 
     pub fn get_complement(&self, msg: &Squitter) -> () {
