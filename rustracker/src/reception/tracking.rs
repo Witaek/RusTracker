@@ -34,8 +34,8 @@ impl Track {
             sock,
             geojson : FeatureCollection {
                 bbox: None,
-                features: vec![],
                 foreign_members: None,
+                features: vec![],
             },
             sender,
         }

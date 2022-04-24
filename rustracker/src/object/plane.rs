@@ -212,10 +212,10 @@ impl Plane {
 
         let feat = Feature {
             bbox: None,
-            geometry: Some(geometry),
             id: Some(Id::String(adress)),
             properties: Some(properties),
             foreign_members: None,
+            geometry: Some(geometry),
         };
         return feat;
     }
