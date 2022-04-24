@@ -192,10 +192,20 @@ impl Plane {
 
         //add properties
         let alt_str = self.altitude.to_string();
-        let speed_str = format!("{} kt | {} : {} ft/min | {}", self.speed.0,self.speed.1, self.speed.2, self.speed.3);
+
+        let speed_str = format!("{}", self.speed.0);
+        let speed_type = format!("{}", self.speed.1);
+        let vertical_speed = format!("{}", self.speed.2);
+        let track = format!("{}", self.speed.3);
+
+
         properties.insert(self.callsign.clone(), to_value("callsign").unwrap());
         properties.insert(alt_str, to_value("altitude").unwrap());
+
         properties.insert(speed_str, to_value("speed").unwrap());
+        properties.insert(speed_type, to_value("sp_tp").unwrap());
+        properties.insert(vertical_speed, to_value("sd_vt").unwrap());
+        properties.insert(track, to_value("track").unwrap());
 
         //add set up geometry
         let geometry = Geometry::new(Value::LineString(self.trajectory.clone()));
