@@ -12,7 +12,7 @@ use std::net::*;
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry, Value, PointType};
 use geojson::feature::Id;
 
-use serde_json::{to_value, Map};
+use serde_json::{to_value, Map, value};
 
 use std::time::{Duration, Instant};
 
@@ -203,21 +203,15 @@ impl Plane {
         let mut properties = Map::new();
 
         //add properties
-        let alt_str = self.altitude.to_string();
-
-        let speed_str = format!("{}", self.speed.0);
-        let speed_type = format!("{}", self.speed.1);
-        let vertical_speed = format!("{}", self.speed.2);
-        let track = format!("{}", self.speed.3);
 
 
-        properties.insert(self.callsign.clone(), to_value("callsign").unwrap());
-        properties.insert(alt_str, to_value("altitude").unwrap());
+        properties.insert(String::from("callsign"), to_value(self.callsign.clone()).unwrap());
+        properties.insert(String::from("altitude"), to_value(self.altitude).unwrap());
 
-        properties.insert(speed_str, to_value("speed").unwrap());
-        properties.insert(speed_type, to_value("sp_tp").unwrap());
-        properties.insert(vertical_speed, to_value("sd_vt").unwrap());
-        properties.insert(track, to_value("track").unwrap());
+        properties.insert(String::from("speed"), to_value(self.speed.0).unwrap());
+        properties.insert(String::from("sp_tp"), to_value(self.speed.1.clone()).unwrap());
+        properties.insert(String::from("sd_vt"), to_value(self.speed.2).unwrap());
+        properties.insert(String::from("track"), to_value(self.speed.4).unwrap());
 
         //add set up geometry
         let geometry = Geometry::new(Value::LineString(self.trajectory.clone()));
