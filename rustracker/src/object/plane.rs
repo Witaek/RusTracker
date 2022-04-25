@@ -5,7 +5,8 @@
 
 use super::squitter::Squitter;
 use crate::data_treatment::identification::callsign;
-use crate::data_treatment::position::{coor, altitude_barometric, altitude_gnss};
+use crate::data_treatment::position_global::{coor_global, altitude_barometric, altitude_gnss};
+use crate::data_treatment::position_local::{coor_local};
 use crate::data_treatment::speed::speed;
 use std::net::*;
 
@@ -22,9 +23,9 @@ pub struct Plane {
     complement: String,                         //complementary information about the plane (from a database) [type string temporaire]
     callsign: String,                           //callsign of the flight  
     position: (f32,f32),                        //actual position of the plane (longitude, latitude)
-    pos_flag: (bool,bool),                      //true if even and odd msg have been detected
+    pos_flag: (bool,bool,bool),                 //1st : true if even have been detected     2: true if odd msg have been detected       3: Global position have been set
     altitude: u32,                              //altitude of the plane
-    speed: (f32, String, f32, String, f32),                        //speed, track angle, vertical speed, speed type
+    speed: (f32, String, f32, String, f32),     //speed, track angle, vertical speed, speed type
     wake_vortex_cat: String,
     
     //past data
@@ -61,7 +62,7 @@ impl Plane {
             speed_history: vec![],
             
             data_pos: (Squitter::default(),Squitter::default()),
-            pos_flag: (false,false),
+            pos_flag: (false,false,false),
 
             last_msg_time: Instant::now(),
         };
@@ -82,14 +83,22 @@ impl Plane {
                 },
             9..=18 => {
                 self.set_altitude_baro(&msg);
-                self.pairing(msg);
-                self.set_position();
+                if self.pos_flag.2 {
+                    self.set_local_position(&msg);
+                } else {
+                    self.pairing(msg);
+                    self.set_global_position();
+                }
                 self.add_position();
                 },
             20..=22 => {
                 self.set_altitude_gnss(&msg);
-                self.pairing(msg);
-                self.set_position();
+                if self.pos_flag.2 {
+                    self.set_local_position(&msg);
+                } else {
+                    self.pairing(msg);
+                    self.set_global_position();
+                }
                 self.add_position();
                 },
             19 => {
@@ -117,26 +126,39 @@ impl Plane {
 
     }
 
-    pub fn set_position(&mut self) -> () {
+    pub fn set_global_position(&mut self) -> () {
         //set the plane's position
         if self.pos_flag.0 && self.pos_flag.1 {     //if we have a even and odd message
             let (even_msg, odd_msg) = &self.data_pos;
             let even_data = even_msg.get_data();
             let odd_data = odd_msg.get_data();
-            self.position = coor(even_data, odd_data);
+            self.position = coor_global(even_data, odd_data);
 
             let p: PointType = vec![self.position.1 as f64,self.position.0 as f64];
             self.trajectory.push(p);
+
+            //can now decode local position
+            self.pos_flag.2 = true;
         }
     }
 
+    pub fn set_local_position(&mut self, msg: &Squitter) -> () {
+
+        //set the plane's position
+        let (lat_ref, lon_ref) = &self.position;
+        self.position = coor_local(msg.get_data(), lat_ref, lon_ref);
+
+        let p: PointType = vec![self.position.1 as f64,self.position.0 as f64];
+        self.trajectory.push(p);
+    }
+
     pub fn add_position(&mut self) -> () {
+
         //add a position record to the history
         let (lat, lon) = self.position.clone();
         let alt = self.altitude.clone();
         self.position_history.push((lat,lon, alt));
 
-        
     }
 
     pub fn set_altitude_baro(&mut self, msg: &Squitter) -> () {

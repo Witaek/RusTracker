@@ -1,7 +1,7 @@
 //test of module data_treatment
 #![allow(dead_code)]
-use crate::data_treatment::position::coor;
-use crate::data_treatment::position::altitude_barometric;
+use crate::data_treatment::position_global::coor_global;
+use crate::data_treatment::position_global::altitude_barometric;
 use crate::data_treatment::identification::callsign;
 use crate::data_treatment::speed::speed;
 
@@ -31,8 +31,8 @@ mod tests_pos {
 
     #[test]
     fn coor_works() {
-        println!("Longitude : {} || Latitude : {}", coor(&EVEN_BIN, &ODD_BIN).0 ,coor(&EVEN_BIN, &ODD_BIN).1 );
-        assert_eq!(coor(&EVEN_BIN, &ODD_BIN), (52.257202,3.9193726));
+        println!("Longitude : {} || Latitude : {}", coor_global(&EVEN_BIN, &ODD_BIN).0 ,coor_global(&EVEN_BIN, &ODD_BIN).1 );
+        assert_eq!(coor_global(&EVEN_BIN, &ODD_BIN), (52.257202,3.9193726));
     }
 
     #[test]

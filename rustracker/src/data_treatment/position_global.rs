@@ -31,7 +31,7 @@ fn j_calcul(&cpr_lat_even : &f32, &cpr_lat_odd: &f32) -> f32 {
 }
 
 //calcul des coordonnées
-pub fn coor(even_data: &[bool; 56], odd_data: &[bool; 56]) -> (f32,f32) {
+pub fn coor_global(even_data: &[bool; 56], odd_data: &[bool; 56]) -> (f32,f32) {
     //constant declaration
     let d_lat_even = 360. / (4. * NZ);
     let d_lat_odd = 360. / (4. * NZ - 1.);
