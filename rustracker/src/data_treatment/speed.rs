@@ -24,7 +24,7 @@ fn cut_in_sections(msg: &[bool; 56]) -> [&[bool];12] {
 
     arr
 }
-pub fn speed(msg: &[bool;56]) -> (f32, String, f32, String) {
+pub fn speed(msg: &[bool;56]) -> (f32, String, f32, String, f32) {
 
     let data = cut_in_sections(msg);
     let sub_type = bin2dec(data[1]);
@@ -32,28 +32,31 @@ pub fn speed(msg: &[bool;56]) -> (f32, String, f32, String) {
     if &sub_type == &1 || &sub_type == &2 {
 
         let dew: u32 = bin2dec(data[5][0..1].try_into().expect("slice with incorrect length"));
-        let vew: i32 = bin2dec(data[5][1..11].try_into().expect("slice with incorrect length")) as i32;
+        let vew: f32 = bin2dec(data[5][1..11].try_into().expect("slice with incorrect length")) as f32;
         let dns: u32 = bin2dec(data[5][11..12].try_into().expect("slice with incorrect length"));
-        let vns: i32 = bin2dec(data[5][12..].try_into().expect("slice with incorrect length")) as i32;
+        let vns: f32 = bin2dec(data[5][12..].try_into().expect("slice with incorrect length")) as f32;
 
         let vx = match dew {
-            1 => -1 * (vew - 1),
-            0 => vew - 1,
+            1 => -1. * (vew - 1.),
+            0 => vew - 1.,
             _ => panic!("dew different from 0 or 1"),
         };
 
         let vy = match dns {
-            1 => -1 * (vns - 1),
-            0 => vns - 1,
+            1 => -1. * (vns - 1.),
+            0 => vns - 1.,
             _ => panic!("dns different from 0 or 1"),
         };
 
-        let mut v: f32 = ((vy.pow(2) + vx.pow(2)) as f32).sqrt();
+        let angle = (vx).atan2(vy)*360./2./std::f32::consts::PI;
+        let angle = (angle).rem_euclid(360.);
+
+        let mut v: f32 = ((vy.powf(2.) + vx.powf(2.)) as f32).sqrt();
         if &sub_type == &2 {v = 4.0 * v}
 
         let vr = vertical_speed(&data[6].try_into().expect("slice with incorrect length"), &data[7].try_into().expect("slice with incorrect length"), &data[8].try_into().expect("slice with incorrect length"));
 
-        (v, vr.1, vr.0, String::from("GS"))
+        (v, vr.1, vr.0, String::from("GS"), angle)
 
     } else if &sub_type == &3 || &sub_type == &4 {
 
@@ -69,7 +72,7 @@ pub fn speed(msg: &[bool;56]) -> (f32, String, f32, String) {
         let vr = vertical_speed(&data[6].try_into().expect("slice with incorrect length"), &data[7].try_into().expect("slice with incorrect length"), &data[8].try_into().expect("slice with incorrect length"));
 
 
-        (v, vr.1, vr.0, String::from("TAS"))
+        (v, vr.1, vr.0, String::from("TAS"), 0.)
     } else {
         panic!("wrong speed sub_type")
     }
