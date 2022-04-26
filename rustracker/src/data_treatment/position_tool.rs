@@ -55,3 +55,17 @@ pub fn nl_calcul(&lat: &f32) -> f32 {
         return (a/(1.- ( 1.- b.cos()) / c.cos().powi(2) ).acos()).floor();
     };
 }
+
+
+//distance
+pub fn distance(coor_1: (f32,f32), coor_2: (f32,f32) ) -> u16 {
+    let r: f32 = 6371.; //earth radius
+
+    let u = (PI * (coor_2.0 - coor_1.0) / 360.).sin().powf(2.);
+    let v = (PI * (coor_2.1 - coor_1.1) / 360.).sin().powf(2.);
+    let n = ((PI/180.)*coor_1.0).cos() * ((PI/180.)*coor_2.0).cos();
+
+    let d = (2. * r *  (u + n * v).sqrt().asin()) as u16;
+
+    return d;
+}
