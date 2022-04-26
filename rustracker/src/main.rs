@@ -65,6 +65,7 @@ fn main() {
             loop{
                 thread::sleep(time::Duration::from_millis(1000));
                 let json_content = receiver_msg.recv().unwrap();
+                file.set_len(0);
                 file.seek(SeekFrom::Start(0));
                 file.write_all(json_content.as_bytes()).unwrap();
             }
