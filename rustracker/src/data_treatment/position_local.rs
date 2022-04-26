@@ -20,6 +20,7 @@ pub fn coor_local(data: &[bool; 56], lat_ref: &f32, lon_ref: &f32) -> (f32,f32) 
 
     let lat = d_lat * (j + cpr_lat);
 
+
     //calculation of longitude
 
     let nl = 360. / nl_calcul(&lat);
@@ -30,8 +31,8 @@ pub fn coor_local(data: &[bool; 56], lat_ref: &f32, lon_ref: &f32) -> (f32,f32) 
 
     let m = (lon_ref/d_lon).floor() +  ( ( modulo(&lon_ref, &d_lon) / d_lon ) - cpr_lon + 0.5 ).floor();
 
-
     let lon = d_lon * (m + cpr_lon);
+    
 
     return (lat,lon);
 }
