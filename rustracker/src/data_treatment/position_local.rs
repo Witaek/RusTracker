@@ -23,7 +23,7 @@ pub fn coor_local(data: &[bool; 56], lat_ref: &f32, lon_ref: &f32) -> (f32,f32) 
 
     //calculation of longitude
 
-    let nl = 360. / nl_calcul(&lat);
+    let nl = nl_calcul(&lat);
 
     let d_lon = 360. / (nl - i).max(1.);
 
