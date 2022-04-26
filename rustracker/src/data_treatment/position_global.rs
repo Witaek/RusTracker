@@ -1,28 +1,7 @@
-#![allow(dead_code)]
-
 use crate::ressources::binary_fun::bin2dec;
+use super::position_tool::{modulo, get_cpr_lat, get_cpr_lon, get_t, nl_calcul, get_alt};
 
-const PI: f32 = std::f32::consts::PI;
 const NZ: f32 = 15.;
-
-fn modulo(x: &f32,y: &f32) -> f32 { //modulo in rust return negative value, so must be redefine
-    return x-y*(x/y).floor();
-}
-
-//NL return the nomber of longitude zone corresponding with the latitude
-fn nl_calcul(&lat: &f32) -> f32 {
-    if lat == 87. || lat == -87. {
-        return 2.;
-    } else if lat == 87. || lat == -87. {
-        return 1.;
-    } else {
-        let a= 2. * PI;
-        let b = PI / (2. * NZ);
-        let c = lat * (PI / 180.);
-        return (a/(1.- ( 1.- b.cos()) / c.cos().powi(2) ).acos()).floor();
-    };
-}
-
 
 
 //calcul of latitude zone index
@@ -75,8 +54,8 @@ pub fn coor_global(even_data: &[bool; 56], odd_data: &[bool; 56]) -> (f32,f32) {
     let d_lon_even = 360. / &n_even;
     let d_lon_odd = 360. / &n_odd;
 
-    let lon_even = d_lon_even * (m%n_even + cpr_lon_even);
-    let lon_odd = d_lon_odd * (m%n_odd + cpr_lon_odd);
+    let lon_even = d_lon_even * (modulo(&m, &n_even) + cpr_lon_even);
+    let lon_odd = d_lon_odd * (modulo(&m, &n_odd) + cpr_lon_odd);
 
     //longitude calcul
     let mut lon = 
@@ -115,39 +94,4 @@ pub fn altitude_barometric (data: &[bool]) -> u32 {           //TC between 9 and
 
 pub fn altitude_gnss (data: &[bool]) -> u32 {                 //TC between 20 and 22
     return bin2dec(get_cpr_lat(data));
-}
-
-
-
-//parsing function
-fn get_tc(data: &[bool]) -> &[bool]{                //get type code
-    return &data[0..5]
-}
-
-fn get_ss(data: &[bool]) -> &[bool]{                //get Surveillance status
-    return &data[5..7]
-}
-
-fn get_saf(data: &[bool]) -> &bool{                 //get Single antenna flag
-    return &data[7]
-}
-
-fn get_alt(data: &[bool]) -> &[bool]{               //get Encoded altitude
-    return &data[8..20]
-}
-
-fn get_t(data: &[bool]) -> &bool{                   //get time
-    return &data[20]
-}
-
-fn get_f(data: &[bool]) -> &bool{                   //get cpr format
-    return &data[21]
-}
-
-fn get_cpr_lat(data: &[bool]) -> &[bool]{           //get cpr latitude
-    return &data[22..39]
-}
-
-fn get_cpr_lon(data: &[bool]) -> &[bool]{           //get cpr longitude
-    return &data[39..56]
 }
