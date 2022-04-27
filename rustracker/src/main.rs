@@ -20,6 +20,7 @@ use std::thread::*;
 use std::io::{Write, SeekFrom, Seek};
 
 use std::sync::mpsc::{channel, Sender, Receiver};
+use single_value_channel::channel_starting_with;
 
 
 
@@ -33,12 +34,13 @@ fn main() {
     sock.bind(addr).unwrap();
     
     //use to receive the geojson
-    let (sender_msg,receiver_msg) : (Sender<String>, Receiver<String>) = channel();
+    //: (Sender<String>, Receiver<String>) 
+    let (mut receiver_msg,updater_msg) = channel_starting_with(String::from(""));
 
     //use to request an update of the tracks to remove the old ones
     let (sender_rm,receiver_rm) : (Sender<bool>, Receiver<bool>) = channel();
 
-    let mut radar1 = Track::new(sock, sender_msg, receiver_rm);
+    let mut radar1 = Track::new(sock, updater_msg, receiver_rm);
 
     //create the geojson
     let mut file = OpenOptions::new()
@@ -64,7 +66,7 @@ fn main() {
         move || {
             loop{
                 thread::sleep(time::Duration::from_millis(1000));
-                let json_content = receiver_msg.recv().unwrap();
+                let json_content = receiver_msg.latest();
                 file.set_len(0);
                 file.seek(SeekFrom::Start(0));
                 file.write_all(json_content.as_bytes()).unwrap();

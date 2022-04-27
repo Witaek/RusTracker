@@ -20,17 +20,20 @@ use std::sync::mpsc::{channel, Sender, Receiver};
 
 use geojson::feature::Id;
 
+use single_value_channel::Updater;
+
+
 pub struct Track {
     track_list: HashMap<String,Plane>,
     sock: zmq::Socket,
     pub geojson : FeatureCollection,
-    sender_msg : Sender<String>,
+    updater_msg : Updater<String>,
     receiver_rm : Receiver<bool>,
 }
 
 
 impl Track {
-    pub fn new(sock: zmq::Socket, sender_msg : Sender<String>, receiver_rm : Receiver<bool>) -> Self {
+    pub fn new(sock: zmq::Socket, updater_msg : Updater<String>, receiver_rm : Receiver<bool>) -> Self {
         Self {
             track_list: HashMap::new(),
             sock,
@@ -39,7 +42,7 @@ impl Track {
                 foreign_members: None,
                 features: vec![],
             },
-            sender_msg,
+            updater_msg,
             receiver_rm,
         }
     }
@@ -76,6 +79,7 @@ impl Track {
             plane.display();
             self.edit_geojson(adress);
         }
+        self.updater_msg.update(self.geojson.to_string()).unwrap();
     }
 
     pub fn edit_geojson(&mut self, adress: String) {
@@ -96,7 +100,6 @@ impl Track {
             //add the feature of a new plane
             self.geojson.features.push(plane_feat);
         }
-        self.sender_msg.send(self.geojson.to_string()).unwrap();
     }
 
     pub fn remove_old_track(&mut self){

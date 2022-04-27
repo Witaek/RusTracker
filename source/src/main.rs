@@ -8,7 +8,7 @@ use zmq::{Context, Message};
 
 fn main() {
     let ctx = Context::new();
-    let addr = "tcp://127.0.0.1:5500";
+    let addr = "tcp://157.159.195.63:5500";
     let sock = ctx.socket(zmq::PUSH).unwrap();
     sock.connect(addr).unwrap();
     tracking(0, &sock);
@@ -32,6 +32,7 @@ pub fn tracking(channel: usize, sock : &zmq::Socket)-> () {
 fn send_squitter(samples: Vec<f64>, socket : &zmq::Socket) ->() {
     let binaries = sample2binary(extraction(samples));
     for s in binaries {
+        println!("sending binary");
         let data = s.convert();
         let msg = Message::from(&data[..]);
         socket.send(msg, 0).unwrap();
