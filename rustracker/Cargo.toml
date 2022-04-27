@@ -9,4 +9,4 @@ edition = "2021"
 zmq = "0.9"
 geojson = "0.22.3"
 serde_json = "1.0.79"
-tokio = { version = "1.17.0", features = ["full"] }
+single_value_channel = "1.2.2"

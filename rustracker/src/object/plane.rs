@@ -8,14 +8,13 @@ use crate::data_treatment::identification::callsign;
 use crate::data_treatment::position_global::{coor_global, altitude_barometric, altitude_gnss};
 use crate::data_treatment::position_local::{coor_local};
 use crate::data_treatment::speed::speed;
-use std::net::*;
 
-use geojson::{Feature, FeatureCollection, GeoJson, Geometry, Value, PointType};
+use geojson::{Feature, Geometry, Value, PointType};
 use geojson::feature::Id;
 
-use serde_json::{to_value, Map, value};
+use serde_json::{to_value, Map};
 
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 pub struct Plane {
     //definition of characteristic attributes of the plane
