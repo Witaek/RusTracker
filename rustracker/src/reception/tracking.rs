@@ -5,18 +5,11 @@ use std::collections::HashMap;
 use crate::object::plane::Plane;
 use crate::object::squitter::Squitter;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
-use std::net::*;
-use std::borrow::Borrow;
-use zmq::*;
 
-use geojson::{Feature, FeatureCollection, GeoJson, Geometry, Value};
-use serde_json::{Map, to_value, to_writer};
+use geojson::{FeatureCollection};
 
-use tokio::io::{self, AsyncWriteExt};
-use tokio::fs::File;
-use tokio::time::{sleep, Duration};
 
-use std::sync::mpsc::{channel, Sender, Receiver};
+use std::sync::mpsc::Receiver;
 
 use geojson::feature::Id;
 

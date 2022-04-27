@@ -1,5 +1,6 @@
 //test of module object
 #![allow(dead_code)]
+#![allow(unused_imports)]
 
 use crate::object::squitter::Squitter;
 

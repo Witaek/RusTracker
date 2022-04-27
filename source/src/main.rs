@@ -8,7 +8,8 @@ use zmq::{Context, Message};
 
 fn main() {
     let ctx = Context::new();
-    let addr = "tcp://157.159.195.63:5500";
+    //tcp://127.0.0.1:5500
+    let addr = "tcp://127.0.0.1:5500";
     let sock = ctx.socket(zmq::PUSH).unwrap();
     sock.connect(addr).unwrap();
     tracking(0, &sock);

@@ -1,5 +1,6 @@
 //test of module data_treatment
 #![allow(dead_code)]
+#![allow(unused_imports)]
 use crate::data_treatment::position_global::coor_global;
 use crate::data_treatment::position_global::altitude_barometric;
 use crate::data_treatment::identification::callsign;

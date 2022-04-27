@@ -1,22 +1,16 @@
-#![allow(unused_imports)]
 #![allow(unused_must_use)]
-
-use crate::data_treatment::speed::speed;
-
 
 //declaration des modules
 mod data_treatment;
 mod object;
 mod ressources;
 mod reception;
-use crate::object::squitter::Squitter;
 use crate::reception::tracking::Track;
 mod test;
 use std::{thread, time};
 use zmq::*;
 
 use std::fs::*;
-use std::thread::*;
 use std::io::{Write, SeekFrom, Seek};
 
 use std::sync::mpsc::{channel, Sender, Receiver};
