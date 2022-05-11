@@ -31,9 +31,9 @@ pub fn speed(msg: &[bool;56]) -> (f32, String, f32, String, f32) {
 
     if &sub_type == &1 || &sub_type == &2 {
 
-        let dew: u32 = bin2dec(data[5][0..1].try_into().expect("slice with incorrect length"));
+        let dew: u32 = bin2dec(data[5][0..1].try_into().expect("slice with incorrect length")).try_into().expect("overflow on dew");
         let vew: f32 = bin2dec(data[5][1..11].try_into().expect("slice with incorrect length")) as f32;
-        let dns: u32 = bin2dec(data[5][11..12].try_into().expect("slice with incorrect length"));
+        let dns: u32 = bin2dec(data[5][11..12].try_into().expect("slice with incorrect length")).try_into().expect("overflow on dew");
         let vns: f32 = bin2dec(data[5][12..].try_into().expect("slice with incorrect length")) as f32;
 
         let vx = match dew {
@@ -62,7 +62,7 @@ pub fn speed(msg: &[bool;56]) -> (f32, String, f32, String, f32) {
 
         //let sh: u32 = bin2dec(data[5][0..1].try_into().expect("slice with incorrect length"));                      //Status bit for magnetic heading
         //let hdg: i32 = bin2dec(data[5][1..11].try_into().expect("slice with incorrect length")) as i32;             //magnetic heading 
-        let as_type: u32 = bin2dec(data[5][11..12].try_into().expect("slice with incorrect length"));                 //air-speed type
+        let as_type: u32 = bin2dec(data[5][11..12].try_into().expect("slice with incorrect length")).try_into().expect("overflow on as_type");                 //air-speed type
         let air_speed: i32 = bin2dec(data[5][12..].try_into().expect("slice with incorrect length")) as i32;          //air-speed
         
 

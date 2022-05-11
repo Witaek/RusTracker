@@ -33,11 +33,11 @@ impl Squitter {
 
 
     pub fn get_df(&self) -> u32{            //get dowlink format
-        return bin2dec(&self.msg[0..5])
+        return bin2dec(&self.msg[0..5]) as u32
     }
 
     pub fn get_ca(&self) -> u32{        //get capatibility
-        return bin2dec(&self.msg[5..8]);
+        return bin2dec(&self.msg[5..8]) as u32;
     }
 
     pub fn get_adress(&self) -> String{    //get icao adress
@@ -54,7 +54,7 @@ impl Squitter {
     }
 
     pub fn get_tc(&self) -> u32{            //get type code
-        return bin2dec(&self.msg[32..37]);
+        return bin2dec(&self.msg[32..37]) as u32;
     }
 
     pub fn crc_check(&self) -> bool {

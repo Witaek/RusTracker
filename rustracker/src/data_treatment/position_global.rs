@@ -86,12 +86,12 @@ pub fn altitude_barometric (data: &[bool]) -> u32 {           //TC between 9 and
         }
     }
     let alt_dec = bin2dec(&alt_bin_wq);
-    let alt: u32 = 
+    let alt: u64 = 
         if *q_bit { alt_dec * 25 - 1000 }
         else { alt_dec * 100 - 1000 };
-    return alt;
+    return alt.try_into().expect("overflow with altitude");
 }
 
 pub fn altitude_gnss (data: &[bool]) -> u32 {                 //TC between 20 and 22
-    return bin2dec(get_cpr_lat(data));
+    return bin2dec(get_cpr_lat(data)).try_into().expect("overflow with altitude");
 }
