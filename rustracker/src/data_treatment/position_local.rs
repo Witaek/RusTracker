@@ -6,7 +6,7 @@ const NZ: f32 = 15.;
 
 
 
-pub fn coor_local(data: &[bool; 56], lat_ref: &f32, lon_ref: &f32) -> (f32,f32) {
+pub fn coor_local(data: &[bool; 56], lat_ref: &f32, lon_ref: &f32) -> Result<(f32,f32),String> {
 
     //calculation of longitude
 
@@ -14,7 +14,10 @@ pub fn coor_local(data: &[bool; 56], lat_ref: &f32, lon_ref: &f32) -> (f32,f32) 
 
     let d_lat = 360. / (4. * NZ - i);
 
-    let cpr_lat = (bin2dec(get_cpr_lat(data)) as f32) / 131072.;
+    let cpr_lat = match bin2dec(get_cpr_lat(data)) {
+        Ok(a) => a as f32 / 131072., //max value of (2^17)
+        Err(a) => return Err(a)
+    };  
 
     let j = (lat_ref/d_lat).floor() +  ( ( modulo(&lat_ref, &d_lat) / d_lat ) - cpr_lat + 0.5 ).floor();
 
@@ -27,12 +30,15 @@ pub fn coor_local(data: &[bool; 56], lat_ref: &f32, lon_ref: &f32) -> (f32,f32) 
 
     let d_lon = 360. / (nl - i).max(1.);
 
-    let cpr_lon = (bin2dec(get_cpr_lon(data)) as f32) / 131072.;
+    let cpr_lon = match bin2dec(get_cpr_lon(data)) {
+        Ok(a) => a as f32 / 131072., //max value of (2^17)
+        Err(a) => return Err(a)
+    };  
 
     let m = (lon_ref/d_lon).floor() +  ( ( modulo(&lon_ref, &d_lon) / d_lon ) - cpr_lon + 0.5 ).floor();
 
     let lon = d_lon * (m + cpr_lon);
     
 
-    return (lat,lon);
+    return Ok((lat,lon));
 }

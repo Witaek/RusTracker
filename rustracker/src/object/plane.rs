@@ -48,7 +48,7 @@ impl Plane {
 
     pub fn new(msg: &Squitter) -> Self { //constructeur à compléter [ACTUELLEMENT : POUR LES TEST]
         let mut n = Self {
-            icao: msg.get_adress(),
+            icao: msg.get_adress().unwrap(),
             complement: "".to_owned(),
             callsign: "".to_owned(),
             position: (0.,0.),
@@ -76,7 +76,7 @@ impl Plane {
 
     pub fn update_plane(&mut self, msg: Squitter) -> () {
         //use a received Squitter to call the adequate fonction according to the type code
-        match msg.get_tc() {
+        match msg.get_tc().unwrap() {
             1..=4 if self.callsign == String::from("") => {
                 self.set_callsign(&msg);
                 },
@@ -131,7 +131,10 @@ impl Plane {
             let (even_msg, odd_msg) = &self.data_pos;
             let even_data = even_msg.get_data();
             let odd_data = odd_msg.get_data();
-            self.position = coor_global(even_data, odd_data);
+            match coor_global(even_data, odd_data) {
+                Ok(a) => self.position = a,
+                Err(a) => ()
+            }
 
             let p: PointType = vec![self.position.1 as f64,self.position.0 as f64];
             self.trajectory.push(p);
@@ -145,7 +148,10 @@ impl Plane {
 
         //set the plane's position
         let (lat_ref, lon_ref) = &self.position;
-        self.position = coor_local(msg.get_data(), lat_ref, lon_ref);
+        match coor_local(msg.get_data(), lat_ref, lon_ref) {
+            Ok(a) => self.position = a,
+            Err(a) => ()
+        };
 
         let p: PointType = vec![self.position.1 as f64,self.position.0 as f64];
         self.trajectory.push(p);
@@ -162,16 +168,25 @@ impl Plane {
 
     pub fn set_altitude_baro(&mut self, msg: &Squitter) -> () {
         //set the plane's position
-        self.altitude = altitude_barometric(msg.get_data());
+        match altitude_barometric(msg.get_data()) {
+        Ok(a) => self.altitude = a,
+        Err(a) => ()
+        };
     }
 
     pub fn set_altitude_gnss(&mut self, msg: &Squitter) -> () {
         //set the plane's position
-        self.altitude = altitude_gnss(msg.get_data());
+        match altitude_gnss(msg.get_data()) {
+            Ok(a) => self.altitude = a,
+            Err(a) => ()
+        };
     }
 
     pub fn set_speed(&mut self, msg: &Squitter) -> () {
-        self.speed = speed(&msg.get_data());
+        match speed(&msg.get_data()) {
+            Ok(a) => self.speed =a,
+            Err(a) => ()
+        }
     }
 
     pub fn add_speed(&mut self) -> () {
@@ -185,7 +200,7 @@ impl Plane {
 
     pub fn set_wvc(&mut self, msg: &Squitter) -> () {
         //use the first squitter receive from a plane to get the wake vortex category
-        let val: (u32,u32) = (msg.get_tc(), msg.get_ca());
+        let val: (u32,u32) = (msg.get_tc().unwrap(), msg.get_ca().unwrap());
         self.wake_vortex_cat=  match val {
             (2,1)       =>     "surface emergency vehicle".to_owned(),
             (2,3)       =>     "surface service vehicle".to_owned(),

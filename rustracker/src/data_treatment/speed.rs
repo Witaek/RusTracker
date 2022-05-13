@@ -24,17 +24,32 @@ fn cut_in_sections(msg: &[bool; 56]) -> [&[bool];12] {
 
     arr
 }
-pub fn speed(msg: &[bool;56]) -> (f32, String, f32, String, f32) {
+pub fn speed(msg: &[bool;56]) -> Result<(f32, String, f32, String, f32), String> {
 
     let data = cut_in_sections(msg);
-    let sub_type = bin2dec(data[1]);
+    let sub_type = bin2dec(data[1]).unwrap();
 
     if &sub_type == &1 || &sub_type == &2 {
 
-        let dew: u32 = bin2dec(data[5][0..1].try_into().expect("slice with incorrect length")).try_into().expect("overflow on dew");
-        let vew: f32 = bin2dec(data[5][1..11].try_into().expect("slice with incorrect length")) as f32;
-        let dns: u32 = bin2dec(data[5][11..12].try_into().expect("slice with incorrect length")).try_into().expect("overflow on dew");
-        let vns: f32 = bin2dec(data[5][12..].try_into().expect("slice with incorrect length")) as f32;
+        let dew: u32 = match bin2dec(data[5][0..1].try_into().expect("slice with incorrect length")) {
+            Ok(a) => a.try_into().expect("overflow on dew"),
+            Err(a) => return Err(a)
+        };
+
+        let vew: f32 = match bin2dec(data[5][1..11].try_into().expect("slice with incorrect length")) { 
+            Ok(a) => a as f32,
+            Err(a) => return Err(a)
+        };
+
+        let dns: u32 = match bin2dec(data[5][11..12].try_into().expect("slice with incorrect length")){
+            Ok(a) => a.try_into().expect("overflow on dew"),
+            Err(a) => return Err(a)
+        };
+
+        let vns: f32 = match bin2dec(data[5][12..].try_into().expect("slice with incorrect length")) {
+            Ok(a) => a as f32,
+            Err(a) => return Err(a)
+        };
 
         let vx = match dew {
             1 => -1. * (vew - 1.),
@@ -54,35 +69,54 @@ pub fn speed(msg: &[bool;56]) -> (f32, String, f32, String, f32) {
         let mut v: f32 = ((vy.powf(2.) + vx.powf(2.)) as f32).sqrt();
         if &sub_type == &2 {v = 4.0 * v}
 
-        let vr = vertical_speed(&data[6].try_into().expect("slice with incorrect length"), &data[7].try_into().expect("slice with incorrect length"), &data[8].try_into().expect("slice with incorrect length"));
+        let vr = match vertical_speed(&data[6].try_into().expect("slice with incorrect length"), &data[7].try_into().expect("slice with incorrect length"), &data[8].try_into().expect("slice with incorrect length")) {
+            Ok(a) => a,
+            Err(a) => return Err(a)
+        };
 
-        (v, vr.1, vr.0, String::from("GS"), angle)
+        Ok((v, vr.1, vr.0, String::from("GS"), angle))
 
     } else if &sub_type == &3 || &sub_type == &4 {
 
         //let sh: u32 = bin2dec(data[5][0..1].try_into().expect("slice with incorrect length"));                      //Status bit for magnetic heading
         //let hdg: i32 = bin2dec(data[5][1..11].try_into().expect("slice with incorrect length")) as i32;             //magnetic heading 
-        let as_type: u32 = bin2dec(data[5][11..12].try_into().expect("slice with incorrect length")).try_into().expect("overflow on as_type");                 //air-speed type
-        let air_speed: i32 = bin2dec(data[5][12..].try_into().expect("slice with incorrect length")) as i32;          //air-speed
+
+        let as_type: u32 = match bin2dec(data[5][11..12].try_into().expect("slice with incorrect length")) {
+            Ok(a) => a.try_into().expect("overflow on as_type"),
+            Err(a) => return Err(a)
+        };  //air-speed type
+
+        let air_speed: i32 = match bin2dec(data[5][12..].try_into().expect("slice with incorrect length")){
+            Ok(a) => a as i32, 
+            Err(a) => return Err(a)
+        };  //air-speed
         
 
         let mut v = (air_speed - 1) as f32;
         if &sub_type == &4 {v = 4.0 * v}
 
-        let vr = vertical_speed(&data[6].try_into().expect("slice with incorrect length"), &data[7].try_into().expect("slice with incorrect length"), &data[8].try_into().expect("slice with incorrect length"));
+        let vr = match vertical_speed(&data[6].try_into().expect("slice with incorrect length"), &data[7].try_into().expect("slice with incorrect length"), &data[8].try_into().expect("slice with incorrect length")) {
+            Ok(a) => a,
+            Err(a) => return Err(a)
+        };
 
 
-        (v, vr.1, vr.0, String::from("TAS"), 0.)
+        Ok((v, vr.1, vr.0, String::from("TAS"), 0.))
     } else {
         panic!("wrong speed sub_type")
     }
 }
 
-pub fn vertical_speed(vbit: &[bool;1], vsign: &[bool;1], vrate: &[bool;9]) -> (f32, String) {
+pub fn vertical_speed(vbit: &[bool;1], vsign: &[bool;1], vrate: &[bool;9]) -> Result<(f32, String),String> {
+
+    let vr = match bin2dec(vrate) {
+        Ok(a) => a,
+        Err(a) => return Err(a)
+    };
 
     let vs = match vsign[0] {
-        false => 64. * (bin2dec(vrate)-1) as f32,
-        true => -64. * (bin2dec(vrate) as f32  -1.),
+        false => 64. * (vr-1) as f32,
+        true => -64. * (vr as f32  -1.),
     };
 
     let source = match vbit[0] {
@@ -90,5 +124,5 @@ pub fn vertical_speed(vbit: &[bool;1], vsign: &[bool;1], vrate: &[bool;9]) -> (f
         true => String::from("Barometric"),
     };
 
-    (vs, source)
+    Ok((vs, source))
 }

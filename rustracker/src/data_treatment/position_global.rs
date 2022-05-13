@@ -10,16 +10,30 @@ fn j_calcul(&cpr_lat_even : &f32, &cpr_lat_odd: &f32) -> f32 {
 }
 
 //calcul des coordonnées
-pub fn coor_global(even_data: &[bool; 56], odd_data: &[bool; 56]) -> (f32,f32) {
+pub fn coor_global(even_data: &[bool; 56], odd_data: &[bool; 56]) -> Result<(f32,f32),String> {
     //constant declaration
     let d_lat_even = 360. / (4. * NZ);
     let d_lat_odd = 360. / (4. * NZ - 1.);
 
     //cpr conversion
-    let cpr_lat_even = (bin2dec(get_cpr_lat(even_data)) as f32) / 131072.;  //max value of (2^17)
-    let cpr_lat_odd = (bin2dec(get_cpr_lat(odd_data)) as f32) / 131072.;
-    let cpr_lon_even = (bin2dec(get_cpr_lon(even_data)) as f32) / 131072.;
-    let cpr_lon_odd = (bin2dec(get_cpr_lon(odd_data)) as f32) / 131072.;
+    let cpr_lat_even = match bin2dec(get_cpr_lat(even_data)) {
+        Ok(a) => a as f32 / 131072., //max value of (2^17)
+        Err(a) => return Err(a)
+    };  
+    let cpr_lat_odd = match bin2dec(get_cpr_lat(odd_data)) {
+        Ok(a) => a as f32 / 131072., //max value of (2^17)
+        Err(a) => return Err(a)
+    };
+
+    let cpr_lon_even = match bin2dec(get_cpr_lon(even_data)) {
+        Ok(a) => a as f32 / 131072., //max value of (2^17)
+        Err(a) => return Err(a)
+    };
+
+    let cpr_lon_odd = match bin2dec(get_cpr_lon(odd_data)) {
+        Ok(a) => a as f32 / 131072., //max value of (2^17)
+        Err(a) => return Err(a)
+    };
 
     //index j calcul
     let j = j_calcul(&cpr_lat_even, &cpr_lat_odd);
@@ -68,10 +82,18 @@ pub fn coor_global(even_data: &[bool; 56], odd_data: &[bool; 56]) -> (f32,f32) {
     //value correction
     if lon >= 180. {lon -= 360.};
 
-    return (lat, lon);
+    return Ok((lat, lon));
 }
 
-pub fn altitude_barometric (data: &[bool]) -> u32 {           //TC between 9 and 18
+
+
+
+
+
+
+
+
+pub fn altitude_barometric (data: &[bool]) -> Result<u32,String> {           //TC between 9 and 18
     let alt_bin = get_alt(data);
     
     let q_bit = &alt_bin[7];
@@ -85,13 +107,29 @@ pub fn altitude_barometric (data: &[bool]) -> u32 {           //TC between 9 and
             alt_bin_wq[k] = alt_bin[k+1]
         }
     }
-    let alt_dec = bin2dec(&alt_bin_wq);
+    let alt_dec = match bin2dec(&alt_bin_wq){
+        Ok(a) => a,
+        Err(a) => return Err(a)
+    };
+
     let alt: u64 = 
         if *q_bit { alt_dec * 25 - 1000 }
         else { alt_dec * 100 - 1000 };
-    return alt.try_into().expect("overflow with altitude");
+
+    return Ok(alt.try_into().unwrap());
 }
 
-pub fn altitude_gnss (data: &[bool]) -> u32 {                 //TC between 20 and 22
-    return bin2dec(get_cpr_lat(data)).try_into().expect("overflow with altitude");
+
+
+
+
+
+
+
+
+pub fn altitude_gnss (data: &[bool]) -> Result<u32,String> {                 //TC between 20 and 22
+    match bin2dec(get_cpr_lat(data)) {
+        Ok(a) => return Ok(a.try_into().expect("overflow with altitude")),
+        Err(a)=> return Err(a)
+    }
 }

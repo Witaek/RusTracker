@@ -29,7 +29,7 @@ pub fn callsign(&data: &[bool; 56]) -> String {
     let arr = decoupage(&data);                                                          
     let mut flight_number: String = String::from("");                                   
     for elem in &arr[2..] {                                                             // translates each section (first two aren't used)
-        let index = bin2dec(elem) as usize;                                             // convert 6 bits section into decimal
+        let index = bin2dec(elem).unwrap() as usize;                                             // convert 6 bits section into decimal
         let letter = &ALPHABET[index];                                                  // looks for corresponding letter in the alphabet
         flight_number.push(*letter)                                                  
     };

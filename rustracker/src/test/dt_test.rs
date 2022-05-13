@@ -32,13 +32,13 @@ mod tests_pos {
 
     #[test]
     fn coor_works() {
-        println!("Longitude : {} || Latitude : {}", coor_global(&EVEN_BIN, &ODD_BIN).0 ,coor_global(&EVEN_BIN, &ODD_BIN).1 );
+        println!("Longitude : {} || Latitude : {}", coor_global(&EVEN_BIN, &ODD_BIN).unwrap().0 ,coor_global(&EVEN_BIN, &ODD_BIN).unwrap().1 );
         assert_eq!(coor_global(&EVEN_BIN, &ODD_BIN), (52.257202,3.9193726));
     }
 
     #[test]
     fn altitude_barometric_works() {
-        println!("Altitude : {}", altitude_barometric(&EVEN_BIN));
+        println!("Altitude : {}", altitude_barometric(&EVEN_BIN).unwrap());
         assert_eq!(altitude_barometric(&EVEN_BIN), 38000);
     }
 }

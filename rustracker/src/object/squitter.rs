@@ -32,16 +32,26 @@ impl Squitter {
     }
 
 
-    pub fn get_df(&self) -> u32{            //get dowlink format
-        return bin2dec(&self.msg[0..5]) as u32
+    pub fn get_df(&self) -> Result<u32,String> {            //get dowlink format
+        match bin2dec(&self.msg[0..5]) {
+            Ok(a) => return Ok(a as u32),
+            Err(a) => Err(a)
+        }
     }
 
-    pub fn get_ca(&self) -> u32{        //get capatibility
-        return bin2dec(&self.msg[5..8]) as u32;
+    pub fn get_ca(&self) -> Result<u32,String> {        //get capatibility
+        match bin2dec(&self.msg[5..8]) {
+            Ok(a) => return Ok(a as u32),
+            Err(a) => Err(a)
+        }
     }
 
-    pub fn get_adress(&self) -> String{    //get icao adress
-        return bin2hex(&self.msg[8..32]);
+    pub fn get_adress(&self) -> Result<String,String> {    //get icao adress
+
+        match bin2hex(&self.msg[8..32]) {
+            Ok(a) => return Ok(a),
+            Err(a) => Err(a)
+        }
 
     }
 
@@ -53,8 +63,12 @@ impl Squitter {
         return &self.msg[88..112];
     }
 
-    pub fn get_tc(&self) -> u32{            //get type code
-        return bin2dec(&self.msg[32..37]) as u32;
+    pub fn get_tc(&self) -> Result<u32,String>{            //get type code
+
+        match bin2dec(&self.msg[32..37]) {
+            Ok(a) => return Ok(a as u32),
+            Err(a) => Err(a)
+        }
     }
 
     pub fn crc_check(&self) -> bool {

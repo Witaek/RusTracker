@@ -62,8 +62,11 @@ impl Track {
 
     fn update_track(&mut self, s: Squitter) {
         //cette fonction doit mettre à jour ou ajouter un avion (Plane) de l'attribut tracklist de self
-        let adress = s.get_adress();
-        if s.get_df()==17 {
+        let adress = match s.get_adress() {
+            Ok(a) => a,
+            Err(a) => return ()
+        };
+        if s.get_df()==Ok(17) {
             let plane = match self.track_list.entry(adress.clone()) {
                 Vacant(entry) => entry.insert(Plane::new(&s)),
                 Occupied(entry) => entry.into_mut(),
