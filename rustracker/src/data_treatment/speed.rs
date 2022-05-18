@@ -115,7 +115,11 @@ pub fn vertical_speed(vbit: &[bool;1], vsign: &[bool;1], vrate: &[bool;9]) -> Re
     };
 
     let vs = match vsign[0] {
-        false => 64. * (vr-1) as f32,
+        false => 
+            match vr {
+                0 => return Err(String::from("soustraction with 0_u32")),
+                a => 64. * a as f32,
+            }
         true => -64. * (vr as f32  -1.),
     };
 
