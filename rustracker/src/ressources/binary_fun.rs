@@ -4,9 +4,13 @@ pub fn bin2dec(binary: &[bool]) -> Result<u64,String> {     //binary to decimal 
     let mut i: u32 = 0;
     for &bit in binary {
         if bit {
-            match res.checked_add(2_u64.pow(n-1-i)) {
-                None => return Err(String::from("overflow at bin2dec")),
-                Some(a) => res = a
+            match 2_u64.checked_pow(n-1-i) {
+                Some (b) =>
+                    match res.checked_add(b) {
+                        None => return Err(String::from("overflow at bin2dec")),
+                        Some(a) => res = a
+                    },
+                None => return Err(String::from("overflow at bin2dec"))
             }
         }
         i+=1;
