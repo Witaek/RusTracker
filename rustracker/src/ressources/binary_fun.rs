@@ -6,7 +6,7 @@ pub fn bin2dec(binary: &[bool]) -> Result<u64,String> {     //binary to decimal 
         if bit {
             match res.checked_add(2_u64.pow(n-1-i)) {
                 None => return Err(String::from("overflow at bin2dec")),
-                Some(a) => res += a
+                Some(a) => res = a
             }
         }
         i+=1;
