@@ -33,7 +33,6 @@ pub fn tracking(channel: usize, sock : &zmq::Socket)-> () {
 fn send_squitter(samples: Vec<f64>, socket : &zmq::Socket) ->() {
     let binaries = sample2binary(extraction(samples));
     for s in binaries {
-        println!("sending binary");
         let data = s.convert();
         let msg = Message::from(&data[..]);
         socket.send(msg, 0).unwrap();
