@@ -7,6 +7,7 @@ use super::squitter::Squitter;
 use crate::data_treatment::identification::callsign;
 use crate::data_treatment::position_global::{coor_global, altitude_barometric, altitude_gnss};
 use crate::data_treatment::position_local::{coor_local};
+use crate::data_treatment::position_tool::{angle};
 use crate::data_treatment::speed::speed;
 
 use geojson::{Feature, Geometry, Value, PointType};
@@ -24,7 +25,7 @@ pub struct Plane {
     position: (f32,f32),                        //actual position of the plane (longitude, latitude)
     pos_flag: (bool,bool,bool),                 //1st : true if even have been detected     2: true if odd msg have been detected       3: Global position have been set
     altitude: u32,                              //altitude of the plane
-    speed: (f32, String, f32, String, f32),     //speed, track angle, vertical speed, speed type
+    speed: (f32, String, f32, String, f32),     //speed, track angle, vertical speed, speed type, track
     wake_vortex_cat: String,
     
     //past data
@@ -34,6 +35,7 @@ pub struct Plane {
     
     //usefull binary msg or data
     data_pos: (Squitter,Squitter),               //tuple of most recent even and odd data from positional messages
+    i_traj: u8,
 
     //time of last message
     pub last_msg_time: Instant,
@@ -62,6 +64,7 @@ impl Plane {
             
             data_pos: (Squitter::default(),Squitter::default()),
             pos_flag: (false,false,false),
+            i_traj: 0,
 
             last_msg_time: Instant::now(),
         };
@@ -89,6 +92,12 @@ impl Plane {
                     self.set_global_position();
                 }
                 self.add_position();
+
+                //check for absurd trajectory :
+                if (2<self.i_traj)&&(self.i_traj<6) {
+                    self.check_angle();
+                }
+
                 },
             20..=22 => {
                 self.set_altitude_gnss(&msg);
@@ -99,6 +108,12 @@ impl Plane {
                     self.set_global_position();
                 }
                 self.add_position();
+
+                //check for absurd trajectory :
+                if (2<self.i_traj)&&(self.i_traj<6) {
+                    self.check_angle();
+                }
+
                 },
             19 => {
                 self.set_speed(&msg);
@@ -260,5 +275,31 @@ impl Plane {
             geometry: Some(geometry),
         };
         return feat;
+    }
+
+    pub fn check_angle(&mut self) -> () {
+        //check for absurd trajectory
+        let n = self.position_history.len();
+        let coor_old = (self.position_history[n-2].0, self.position_history[n-2].0);
+        let coor_new = (self.position_history[n-1].0, self.position_history[n-1].0);
+        let calculated_angle = angle(coor_old,coor_new);
+
+        let res = match (calculated_angle,self.speed.4) {
+            (a,b) if (((0.<a) &&(a<=180.) && (0.<b) && (b<=180.)) || ((180.<a) &&(a<360.) && (180.<b) && (b<360.))) => (a-b).abs(),
+            (a,b) if (((0.<a) && (a<=180.) && (180.<b) &&(b<360.)) || ((180.<a) && (a<360.) && (0.<b) && (b<= 180.))) => (360.-a+b).abs(),
+            _=>0.,
+        };
+
+        if res>180. {self.reset_position();}
+        else {self.i_traj += 1}
+    }
+
+    pub fn reset_position(&mut self) {
+        self.position = (0.,0.);
+        self.position_history = vec![];
+        self.trajectory = vec![];
+        self.data_pos = (Squitter::default(),Squitter::default());
+        self.pos_flag = (false,false,false);
+        self.i_traj= 0;
     }
 }

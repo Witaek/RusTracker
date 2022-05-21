@@ -57,15 +57,18 @@ pub fn nl_calcul(&lat: &f32) -> f32 {
 }
 
 
-//distance
-pub fn distance(coor_1: (f32,f32), coor_2: (f32,f32) ) -> u16 {
-    let r: f32 = 6371.; //earth radius
+pub fn angle(old: (f32,f32), new: (f32,f32) ) -> f32 {
 
-    let u = (PI * (coor_2.0 - coor_1.0) / 360.).sin().powf(2.);
-    let v = (PI * (coor_2.1 - coor_1.1) / 360.).sin().powf(2.);
-    let n = ((PI/180.)*coor_1.0).cos() * ((PI/180.)*coor_2.0).cos();
-
-    let d = (2. * r *  (u + n * v).sqrt().asin()) as u16;
-
-    return d;
+    let phi1 = old.0*PI/180.;
+    let phi2 = new.0*PI/180.;
+    
+    let lmb1 = old.1*PI/180.;
+    let lmb2 = new.1*PI/180.;
+    
+    let y = (lmb2-lmb1).sin() * phi2.cos();
+    let x = phi1.cos()*phi2.sin() - phi1.sin()*phi2.cos()*(lmb2-lmb1).cos();
+    let res = y.atan2(x);
+    
+    return (res*180./PI + 360.)%360.
+    
 }

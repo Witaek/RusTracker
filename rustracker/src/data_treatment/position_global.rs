@@ -113,8 +113,19 @@ pub fn altitude_barometric (data: &[bool]) -> Result<u32,String> {           //T
     };
 
     let alt: u64 = 
-        if *q_bit { alt_dec * 25 - 1000 }
-        else { alt_dec * 100 - 1000 };
+        if *q_bit { 
+            if alt_dec * 25 > 1000 {
+                alt_dec * 25 - 1000
+            } else {
+                return Err(String::from("overflow due to substract"));
+            }}
+        else { 
+            if alt_dec * 100 > 1000 {
+                alt_dec * 100 - 1000
+            } else {
+                return Err(String::from("overflow due to substract"));
+            }
+        };
 
     return Ok(alt.try_into().unwrap());
 }
