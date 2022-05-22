@@ -290,7 +290,7 @@ impl Plane {
             _=>0.,
         };
 
-        if res>180. {self.reset_position();}
+        if res>90. {self.reset_position();}
         else {self.i_traj += 1}
     }
 
