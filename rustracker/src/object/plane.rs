@@ -35,7 +35,6 @@ pub struct Plane {
     
     //usefull binary msg or data
     data_pos: (Squitter,Squitter),               //tuple of most recent even and odd data from positional messages
-    i_traj: u8,
 
     //time of last message
     pub last_msg_time: Instant,
@@ -64,13 +63,11 @@ impl Plane {
             
             data_pos: (Squitter::default(),Squitter::default()),
             pos_flag: (false,false,false),
-            i_traj: 0,
 
             last_msg_time: Instant::now(),
         };
         n.set_wvc(msg);
         n.get_complement(msg);
-        println!("nouvel avion");
         return n;
     }
 }
@@ -91,10 +88,12 @@ impl Plane {
                     self.pairing(msg);
                     self.set_global_position();
                 }
-                self.add_position();
+                if self.pos_flag.2 {
+                    self.add_position();
+                }
 
                 //check for absurd trajectory :
-                if (2<self.i_traj)&&(self.i_traj<6) {
+                if self.position_history.len()>2 {
                     self.check_angle();
                 }
 
@@ -107,10 +106,12 @@ impl Plane {
                     self.pairing(msg);
                     self.set_global_position();
                 }
-                self.add_position();
+                if self.pos_flag.2 {
+                    self.add_position();
+                }
 
                 //check for absurd trajectory :
-                if (2<self.i_traj)&&(self.i_traj<6) {
+                if self.position_history.len()>2 {
                     self.check_angle();
                 }
 
@@ -135,8 +136,8 @@ impl Plane {
 
     pub fn pairing(&mut self, msg: Squitter) -> () {
         //update the tuple self.data_pos with a new data
-        if msg.msg[54]==false   {self.data_pos.0 = msg; self.pos_flag.0 = true; println!("even");}
-        else                    {self.data_pos.1 = msg; self.pos_flag.1 = true; println!("odd");}
+        if msg.msg[54]==false   {self.data_pos.0 = msg; self.pos_flag.0 = true;}
+        else                    {self.data_pos.1 = msg; self.pos_flag.1 = true;}
 
     }
 
@@ -280,18 +281,17 @@ impl Plane {
     pub fn check_angle(&mut self) -> () {
         //check for absurd trajectory
         let n = self.position_history.len();
-        let coor_old = (self.position_history[n-2].0, self.position_history[n-2].0);
-        let coor_new = (self.position_history[n-1].0, self.position_history[n-1].0);
+        let coor_old = (self.position_history[n-2].0, self.position_history[n-2].1);
+        let coor_new = (self.position_history[n-1].0, self.position_history[n-1].1);
         let calculated_angle = angle(coor_old,coor_new);
 
         let res = match (calculated_angle,self.speed.4) {
             (a,b) if (((0.<a) &&(a<=180.) && (0.<b) && (b<=180.)) || ((180.<a) &&(a<360.) && (180.<b) && (b<360.))) => (a-b).abs(),
-            (a,b) if (((0.<a) && (a<=180.) && (180.<b) &&(b<360.)) || ((180.<a) && (a<360.) && (0.<b) && (b<= 180.))) => (360.-a+b).abs(),
+            (a,b) if ((0.<a) && (a<=180.) && (180.<b) &&(b<360.)) => (360.+a-b).abs(),
+            (a,b) if ((180.<a) && (a<360.) && (0.<b) && (b<= 180.)) => (360. - a + b).abs(),
             _=>0.,
         };
-
-        if res>180. {self.reset_position();}
-        else {self.i_traj += 1}
+        if res>90. {self.reset_position();}
     }
 
     pub fn reset_position(&mut self) {
@@ -300,6 +300,5 @@ impl Plane {
         self.trajectory = vec![];
         self.data_pos = (Squitter::default(),Squitter::default());
         self.pos_flag = (false,false,false);
-        self.i_traj= 0;
     }
 }
