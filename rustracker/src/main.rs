@@ -76,7 +76,7 @@ fn main() {
                 let json_content_record = receiver_msg_record.latest();
                 file_record.set_len(0);
                 file_record.seek(SeekFrom::Start(0));
-                file_record.write_all(json_content.as_bytes()).unwrap();
+                file_record.write_all(json_content_record.as_bytes()).unwrap();
             }
         }
     );
