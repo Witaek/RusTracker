@@ -20,13 +20,15 @@ pub struct Track {
     track_list: HashMap<String,Plane>,
     sock: zmq::Socket,
     pub geojson : FeatureCollection,
+    pub geojson_record : FeatureCollection,
     updater_msg : Updater<String>,
+    updater_msg_record : Updater<String>,
     receiver_rm : Receiver<bool>,
 }
 
 
 impl Track {
-    pub fn new(sock: zmq::Socket, updater_msg : Updater<String>, receiver_rm : Receiver<bool>) -> Self {
+    pub fn new(sock: zmq::Socket, updater_msg : Updater<String>, updater_msg_record : Updater<String>, receiver_rm : Receiver<bool>) -> Self {
         Self {
             track_list: HashMap::new(),
             sock,
@@ -35,7 +37,13 @@ impl Track {
                 foreign_members: None,
                 features: vec![],
             },
+            geojson_record : FeatureCollection {
+                bbox: None,
+                foreign_members: None,
+                features: vec![],
+            },
             updater_msg,
+            updater_msg_record,
             receiver_rm,
         }
     }
@@ -76,12 +84,15 @@ impl Track {
             self.edit_geojson(adress);
         }
         self.updater_msg.update(self.geojson.to_string()).unwrap();
+        self.updater_msg_record.update(self.geojson_record.to_string()).unwrap();
     }
 
     pub fn edit_geojson(&mut self, adress: String) {
         let mut flag = false;
+        let mut flag_record = false;
 
-        let plane_feat = self.track_list.get(&adress).unwrap().into_feat(adress);
+        let plane_feat = self.track_list.get(&adress).unwrap().into_feat(&adress);
+        let plane_feat_record = self.track_list.get(&adress).unwrap().into_feat_record(&adress);
 
         for i in 0..self.geojson.features.len() {
             //actualize the feature if the plane is known
@@ -92,9 +103,23 @@ impl Track {
             }
         }
 
+        for i in 0..self.geojson_record.features.len() {
+            //actualize the feature if the plane is known
+            if self.geojson_record.features[i].id.as_ref().unwrap().eq(&plane_feat_record.id.as_ref().unwrap()) {
+                self.geojson_record.features[i] = plane_feat_record.clone();
+                flag_record = true;
+                break;
+            }
+        }
+
         if !flag {
             //add the feature of a new plane
             self.geojson.features.push(plane_feat);
+        }
+
+        if !flag_record {
+            //add the feature of a new plane
+            self.geojson_record.features.push(plane_feat_record);
         }
     }
 

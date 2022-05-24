@@ -30,11 +30,12 @@ fn main() {
     //use to receive the geojson
     //: (Sender<String>, Receiver<String>) 
     let (mut receiver_msg,updater_msg) = channel_starting_with(String::from(""));
+    let (mut receiver_msg_record,updater_msg_record) = channel_starting_with(String::from(""));
 
     //use to request an update of the tracks to remove the old ones
     let (sender_rm,receiver_rm) : (Sender<bool>, Receiver<bool>) = channel();
 
-    let mut radar1 = Track::new(sock, updater_msg, receiver_rm);
+    let mut radar1 = Track::new(sock, updater_msg, updater_msg_record, receiver_rm);
 
     //create the geojson
     let mut file = OpenOptions::new()
@@ -42,6 +43,13 @@ fn main() {
         .truncate(true)
         .create(true)
         .open("planes.geojson")
+        .unwrap();
+
+    let mut file_record = OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .create(true)
+        .open("planes_record.geojson")
         .unwrap();
     
     let time_wait = time::Duration::from_secs(30);
@@ -64,6 +72,11 @@ fn main() {
                 file.set_len(0);
                 file.seek(SeekFrom::Start(0));
                 file.write_all(json_content.as_bytes()).unwrap();
+
+                let json_content_record = receiver_msg_record.latest();
+                file_record.set_len(0);
+                file_record.seek(SeekFrom::Start(0));
+                file_record.write_all(json_content.as_bytes()).unwrap();
             }
         }
     );

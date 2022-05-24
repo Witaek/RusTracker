@@ -250,7 +250,7 @@ impl Plane {
         println!("speed :       {} kt | {} : {} ft/min | {}", self.speed.0,self.speed.1, self.speed.2, self.speed.3);
     }
 
-    pub fn into_feat(&self, adress: String) -> Feature {
+    pub fn into_feat(&self, adress: &String) -> Feature {
         //return tuple of geojson::Feature first for the actual position second for the past trajectory
         let mut properties = Map::new();
 
@@ -270,8 +270,24 @@ impl Plane {
 
         let feat = Feature {
             bbox: None,
-            id: Some(Id::String(adress)),
+            id: Some(Id::String(adress.clone())),
             properties: Some(properties),
+            foreign_members: None,
+            geometry: Some(geometry),
+        };
+        return feat;
+    }
+
+    pub fn into_feat_record(&self, adress: &String) -> Feature {
+        //geojson for record trajectory
+
+        //add set up geometry
+        let geometry = Geometry::new(Value::LineString(self.trajectory.clone()));
+
+        let feat = Feature {
+            bbox: None,
+            id: Some(Id::String(adress.clone())),
+            properties: None,
             foreign_members: None,
             geometry: Some(geometry),
         };
