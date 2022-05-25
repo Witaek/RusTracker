@@ -103,7 +103,8 @@ pub fn speed(msg: &[bool;56]) -> Result<(f32, String, f32, String, f32), String>
 
         Ok((v, vr.1, vr.0, String::from("TAS"), 0.))
     } else {
-        panic!("wrong speed sub_type")
+        Err(String::from("mauvais subtype"))
+
     }
 }
 
