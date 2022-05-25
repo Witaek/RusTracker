@@ -54,13 +54,13 @@ pub fn speed(msg: &[bool;56]) -> Result<(f32, String, f32, String, f32), String>
         let vx = match dew {
             1 => -1. * (vew - 1.),
             0 => vew - 1.,
-            _ => panic!("dew different from 0 or 1"),
+            _ => return Err(String::from("dew different from 0 or 1")),
         };
 
         let vy = match dns {
             1 => -1. * (vns - 1.),
             0 => vns - 1.,
-            _ => panic!("dns different from 0 or 1"),
+            _ => return Err(String::from("dns different from 0 or 1")),
         };
 
         let angle = (vx).atan2(vy)*360./2./std::f32::consts::PI;
