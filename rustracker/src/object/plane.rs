@@ -23,7 +23,8 @@ pub struct Plane {
     complement: String,                         //complementary information about the plane (from a database) [type string temporaire]
     callsign: String,                           //callsign of the flight  
     position: (f32,f32),                        //actual position of the plane (longitude, latitude)
-    pos_flag: (bool,bool,bool),                 //1st : true if even have been detected     2: true if odd msg have been detected       3: Global position have been set
+    pos_flag: (bool,bool,bool, bool),           //1st : true if even have been detected     2: true if odd msg have been detected       3: Global position have been set    4: position is coherent
+    pos_index: u8,                              //number of the decoded position (used only to check the coherence of position)
     altitude: u32,                              //altitude of the plane
     speed: (f32, String, f32, String, f32),     //speed, track angle, vertical speed, speed type, track
     wake_vortex_cat: String,
@@ -62,7 +63,8 @@ impl Plane {
             speed_history: vec![],
             
             data_pos: (Squitter::default(),Squitter::default()),
-            pos_flag: (false,false,false),
+            pos_flag: (false,false,false, false),
+            pos_index: 0,
 
             last_msg_time: Instant::now(),
         };
@@ -93,7 +95,7 @@ impl Plane {
                 }
 
                 //check for absurd trajectory :
-                if self.position_history.len()>2 {
+                if !self.pos_flag.3 && self.position_history.len()>2 {
                     self.check_angle();
                 }
 
@@ -111,7 +113,7 @@ impl Plane {
                 }
 
                 //check for absurd trajectory :
-                if self.position_history.len()>2 {
+                if !self.pos_flag.3 && self.position_history.len()>2 {
                     self.check_angle();
                 }
 
@@ -291,7 +293,8 @@ impl Plane {
             (a,b) if ((180.<a) && (a<360.) && (0.<b) && (b<= 180.)) => (360. - a + b).abs(),
             _=>0.,
         };
-        if res>90. {self.reset_position();}
+        if res>90. { self.reset_position();}
+        else {self.pos_index += 1; if self.pos_index>=5  {self.pos_flag.3 = true}}
     }
 
     pub fn reset_position(&mut self) {
@@ -299,6 +302,7 @@ impl Plane {
         self.position_history = vec![];
         self.trajectory = vec![];
         self.data_pos = (Squitter::default(),Squitter::default());
-        self.pos_flag = (false,false,false);
+        self.pos_flag = (false,false,false, false);
+        self.pos_index = 0;
     }
 }
