@@ -48,7 +48,10 @@ pub fn tracking(channel: usize, sock : &zmq::Socket)-> () {
     loop {
         let read_size = buf.len();
         //stream.read return the nomber of samples read in addition to start the reading
-        let buf_len = stream.read(&[&mut buf[..read_size]], 1_000_000).expect("read failed");
+        let buf_len = match stream.read(&[&mut buf[..read_size]], 1_000_000)  {
+            Ok(a)=>a,
+            Err(a)=> {println!("{}",a); continue}
+        };
         let samples = amp(&buf[..buf_len]);
         let (n_true, n_tot) = send_squitter(samples, sock);
         stat.0 += n_true;
