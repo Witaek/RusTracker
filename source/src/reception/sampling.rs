@@ -53,7 +53,9 @@ pub fn extraction(samples: Vec<f64>)-> Vec<[f64;224]> {
     return packets;
 }
 
-pub fn sample2binary(packets: Vec<[f64;224]>) -> Vec<Squitter> {
+pub fn sample2binary(packets: Vec<[f64;224]>) -> (Vec<Squitter>, u32, u32) {
+    let mut n_true = 0;
+    let mut n_tot = 0;
     let mut binaries: Vec<Squitter> = vec![];
     for sample in packets {
         let mut s = Squitter::default(); //initialisation d'un squitter remplie de 0
@@ -66,7 +68,8 @@ pub fn sample2binary(packets: Vec<[f64;224]>) -> Vec<Squitter> {
                 continue;
             }
         }
-        if s.crc_check() {binaries.push(s);}
+        n_tot += 1;
+        if s.crc_check() {binaries.push(s); n_true +=1;}
     }
-    return binaries;
+    return (binaries, n_true, n_tot);
 }
