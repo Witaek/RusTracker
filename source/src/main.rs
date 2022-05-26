@@ -13,7 +13,7 @@ use std::{thread, time};
 fn main() {
     let ctx = Context::new();
     //tcp://127.0.0.1:5500
-    let addr = "tcp://127.0.0.1:5500";
+    let addr = "tcp://157.195.159.63:5500";
     let sock = ctx.socket(zmq::PUSH).unwrap();
     sock.connect(addr).unwrap();
     let (mut receiver,updater) = channel_starting_with((0,0,Local::now().to_rfc3339_opts(SecondsFormat::Secs, false)));
@@ -33,7 +33,7 @@ fn main() {
 }
 
 pub fn tracking(channel: usize, sock : &zmq::Socket, updater: Updater<(u32,u32,String)>)-> () {
-    let stat = (0,0); //Local::now().to_rfc3339_opts(SecondsFormat::Secs, false)
+    let mut stat = (0,0); //Local::now().to_rfc3339_opts(SecondsFormat::Secs, false)
     let source = init_device(channel);
     let mut stream = source.rx_stream::<Complex<f32>>(&[channel]).unwrap();
     let mut buf = vec![Complex::new(0.0, 0.0); stream.mtu().unwrap()];
@@ -45,7 +45,9 @@ pub fn tracking(channel: usize, sock : &zmq::Socket, updater: Updater<(u32,u32,S
         let buf_len = stream.read(&[&mut buf[..read_size]], 1_000_000).expect("read failed");
         let samples = amp(&buf[..buf_len]);
         let (n_true, n_tot) = send_squitter(samples, sock);
-        updater.update((n_true, n_tot, Local::now().to_rfc3339_opts(SecondsFormat::Secs, false))).unwrap();
+        stat.0 += n_true;
+        stat.1 += n_tot;
+        updater.update((stat.0, stat.1, Local::now().to_rfc3339_opts(SecondsFormat::Secs, false))).unwrap();
     } 
 }
 
