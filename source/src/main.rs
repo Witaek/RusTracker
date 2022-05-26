@@ -16,28 +16,34 @@ fn main() {
     let addr = "tcp://157.195.159.63:5500";
     let sock = ctx.socket(zmq::PUSH).unwrap();
     sock.connect(addr).unwrap();
-    let (mut receiver,updater) = channel_starting_with((0,0,Local::now().to_rfc3339_opts(SecondsFormat::Secs, false)));
+    
 
-    let time_wait = time::Duration::from_secs(60*10);
-    thread::spawn (
-        move || {
-            loop {
-                thread::sleep(time_wait);
-                let stat = receiver.latest();
-                println!("{} | nb_msg_true : {} | nb_msg_detected : {}", stat.2, stat.0, stat.1);
-            }
-        }
-    );
+    
+    
 
-    tracking(0, &sock, updater);
+    tracking(0, &sock);
 }
 
-pub fn tracking(channel: usize, sock : &zmq::Socket, updater: Updater<(u32,u32,String)>)-> () {
+pub fn tracking(channel: usize, sock : &zmq::Socket)-> () {
     let mut stat = (0,0); //Local::now().to_rfc3339_opts(SecondsFormat::Secs, false)
     let source = init_device(channel);
     let mut stream = source.rx_stream::<Complex<f32>>(&[channel]).unwrap();
     let mut buf = vec![Complex::new(0.0, 0.0); stream.mtu().unwrap()];
     stream.activate(None).expect("failed to activate stream");
+
+    let time_wait = time::Duration::from_secs(10);
+
+    let (mut receiver,updater) = channel_starting_with((0,0,Local::now().to_rfc3339_opts(SecondsFormat::Secs, false)));
+
+    thread::spawn (
+        move || {
+            loop {
+                let stat = receiver.latest();
+                println!("{} | nb_msg_true : {} | nb_msg_detected : {}", stat.2, stat.0, stat.1);
+                thread::sleep(time_wait);
+            }
+        }
+    );
 
     loop {
         let read_size = buf.len();
