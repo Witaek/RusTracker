@@ -1,5 +1,7 @@
 # RusTracker
 
+Présentation et explications du livrable final : https://witaek.github.io/TrackBook/
+
 #### **Livrable minimal :**   
 --> Récupérer et traiter un signal ADS-B envoyé par plusieurs avions  
 --> En extraire des informations sur la position, vitesse, altitude, modèle, ...  
@@ -9,8 +11,6 @@
 #### **Ajouts optionnels :**   
 --> Trianguler de petits avions/helicoptères qui n'envoient pas leur position  
 --> Interface web pour rendre l'app multiplatforme
-
-Permission écriture /var/www/html : sudo chown -R $USER:$USER /var/www
 
 
 #### **Contributeurs :**  
